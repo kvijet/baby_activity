@@ -89,18 +89,18 @@ with container2:
                 st.info("No changes to save.")
     else:
         st.info("No data found.")
-        st.header("Analytics")
+st.header("Analytics")
 
-        # Select baby's day start time
-        day_start_time = st.time_input(
-            "Select Baby's day start time",
-            value=datetime.strptime("09:00", "%H:%M").time()
-        )
+# Select baby's day start time
+day_start_time = st.time_input(
+    "Select Baby's day start time",
+    value=datetime.strptime("09:00", "%H:%M").time()
+)
 
-        # Select analytics interval
-        interval_options = ["6 hours", "12 hours", "24 hours", "48 hours"]
-        selected_interval = st.selectbox(
-            "Select Analytics Interval",
-            options=interval_options,
-            index=2  # Default to "24 hours"
-        )
+# Select analytics interval
+interval_options = ["6 hours", "12 hours", "24 hours", "48 hours"]
+selected_interval = st.selectbox(
+    "Select Analytics Interval",
+    options=interval_options,
+    index=2  # Default to "24 hours"
+)
