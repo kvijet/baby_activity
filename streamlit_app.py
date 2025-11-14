@@ -134,6 +134,20 @@ if data:
     st.subheader("Daily Groups (Development View)")
     
     daily_groups = {}
+
+    # Add "Today so far" group for current date
+    today_start = cutoff_datetime
+    today_end = now_ist
+    today_data = df_analytics[
+        (df_analytics["datetime"] >= today_start) & 
+        (df_analytics["datetime"] <= today_end)
+    ].copy()
+
+    if not today_data.empty:
+        daily_groups[f"Today so far ({today_start.strftime('%Y-%m-%d %H:%M')} to {today_end.strftime('%Y-%m-%d %H:%M')})"] = today_data
+        st.write(f"**Today so far: {today_start.strftime('%Y-%m-%d %H:%M')} to {today_end.strftime('%Y-%m-%d %H:%M')}**")
+        st.write(f"Records: {len(today_data)}")
+        st.dataframe(today_data)
     for day_offset in range(num_days):
         day_start = analytics_start_datetime + pd.Timedelta(days=day_offset)
         day_end = analytics_start_datetime + pd.Timedelta(days=day_offset + 1)
