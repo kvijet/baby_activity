@@ -82,19 +82,20 @@ with container2:
                 st.info("No changes to save.")
     else:
         st.info("No data found.")
+
 st.header("Analytics")
 
-# Select baby's day start time
-day_start_time = st.time_input(
-    "Select Baby's day start time",
-    value=datetime.strptime("09:00", "%H:%M").time()
-)
-# Select time frame for analytics
-st.subheader("Time Frame for Analytics")
-num_days = st.number_input(
-    "Select number of days for analytics",
-    min_value=1,
-    max_value=30,
-    value=3,  # Default to 3 days
-    step=1
-)
+col1, col2 = st.columns(2)
+with col1:
+    day_start_time = st.time_input(
+        "Day start time",
+        value=datetime.strptime("09:00", "%H:%M").time()
+    )
+with col2:
+    num_days = st.number_input(
+        "Number of days",
+        min_value=1,
+        max_value=30,
+        value=3,
+        step=1
+    )
