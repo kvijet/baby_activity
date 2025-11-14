@@ -48,7 +48,7 @@ with container2:
         records = data[1:]
         import pandas as pd
         df = pd.DataFrame(records, columns=headers)
-        st.dataframe(df)
+        st.dataframe(df, hide_index=True)
     else:
         st.info("No data found.")
         
