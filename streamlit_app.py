@@ -4,6 +4,9 @@ from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 import pytz
 
+st.set_page_config(page_title="Suddu Tracker")
+st.title("Suddu Tracker")
+
 # Use your provided authentication variables
 scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
 creds_dict = st.secrets["service_account"]
@@ -53,7 +56,7 @@ with container2:
 # import pandas as pd
 # import json
 
-Load credentials from Streamlit secrets
+# Load credentials from Streamlit secrets
 
 # scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
 
