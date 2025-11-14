@@ -43,15 +43,26 @@ with container1:
 with container2:
     st.header("Recent Activity")
     data = sheet.get_all_values()
-    if data:
-        headers = data[0]
-        records = data[1:]
-        import pandas as pd
-        df = pd.DataFrame(records, columns=headers)
-        st.dataframe(df, hide_index=True)
-    else:
-        st.info("No data found.")
-        
+if data:
+    headers = data[0]
+    records = data[1:]
+    import pandas as pd
+    df = pd.DataFrame(records, columns=headers)
+    
+    edited_df = st.data_editor(df, num_rows="dynamic", key="activity_editor")
+    
+    if st.button("Save Changes"):
+        # Find changed rows by comparing df and edited_df
+        changes = edited_df.compare(df)
+        if not changes.empty:
+            # For each changed row, update the Google Sheet
+            for idx in changes.index.get_level_values(0).unique():
+                # Row in Google Sheet (add 2: +1 for header, +1 because Sheets are 1-indexed)
+                sheet.update(f'A{idx+2}:{chr(65+len(headers)-1)}{idx+2}', [list(edited_df.loc[idx])])
+            st.success("Changes saved to Google Sheet!")
+        else:
+            st.info("No changes to save.")
+
 ##########Old code#########
 
 # import streamlit as st
