@@ -145,15 +145,15 @@ if data:
         
         # Check if "Woke Up" appears before "Slept"
         if not day_data.empty:
-            first_slept = day_data[day_data["Activity"] == "Slept"]["datetime"].min() if "Slept" in day_data["Activity"].values else None
-            first_woke_up = day_data[day_data["Activity"] == "Woke Up"]["datetime"].min() if "Woke Up" in day_data["Activity"].values else None
+            first_slept = day_data[day_data["Action"] == "Slept"]["datetime"].min() if "Slept" in day_data["Action"].values else None
+            first_woke_up = day_data[day_data["Action"] == "Woke Up"]["datetime"].min() if "Woke Up" in day_data["Action"].values else None
             
             # Add "Slept" at start of day if "Woke Up" comes before first "Slept"
             if first_woke_up is not None and (first_slept is None or first_woke_up < first_slept):
                 new_row = pd.DataFrame({
                     "Date": [day_start.strftime('%Y-%m-%d')],
                     "Time": [day_start.strftime('%H:%M:%S')],
-                    "Activity": ["Slept"],
+                    "Action": ["Slept"],
                     "Notes": ["Auto-added: Day started with wake up"],
                     "datetime": [day_start]
                 })
