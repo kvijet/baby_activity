@@ -89,11 +89,12 @@ day_start_time = st.time_input(
     "Select Baby's day start time",
     value=datetime.strptime("09:00", "%H:%M").time()
 )
-
-# Select analytics interval
-interval_options = ["6 hours", "12 hours", "24 hours", "48 hours"]
-selected_interval = st.selectbox(
-    "Select Analytics Interval",
-    options=interval_options,
-    index=2  # Default to "24 hours"
+# Select time frame for analytics
+st.subheader("Time Frame for Analytics")
+num_days = st.number_input(
+    "Select number of days for analytics",
+    min_value=1,
+    max_value=30,
+    value=3,  # Default to 3 days
+    step=1
 )
