@@ -43,11 +43,15 @@ with container1:
 with container2:
     st.header("Recent Activity")
     data = sheet.get_all_values()
-    st.dataframe(data)
-
-
-
-
+    if data:
+        headers = data[0]
+        records = data[1:]
+        import pandas as pd
+        df = pd.DataFrame(records, columns=headers)
+        st.dataframe(df)
+    else:
+        st.info("No data found.")
+        
 ##########Old code#########
 
 # import streamlit as st
