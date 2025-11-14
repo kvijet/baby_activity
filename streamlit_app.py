@@ -99,3 +99,33 @@ with col2:
         value=3,  # Default to 3 days
         step=1
     )
+    # Calculate analytics cutoff datetime
+    ist = pytz.timezone('Asia/Kolkata')
+    now_ist = datetime.now(ist)
+
+    # Combine today's date with the selected day_start_time
+    cutoff_datetime = datetime.combine(now_ist.date(), day_start_time)
+    cutoff_datetime = ist.localize(cutoff_datetime)
+
+    # Go back num_days from the cutoff
+    analytics_start_datetime = cutoff_datetime - pd.Timedelta(days=num_days)
+
+    # Display for development
+    st.subheader("Analytics Date Range (Development View)")
+    st.write(f"Current IST Time: {now_ist.strftime('%Y-%m-%d %H:%M:%S')}")
+    st.write(f"Day Start Time Selected: {day_start_time.strftime('%H:%M')}")
+    st.write(f"Number of Days: {num_days}")
+    st.write(f"Analytics Start DateTime: {analytics_start_datetime.strftime('%Y-%m-%d %H:%M:%S')}")
+    st.write(f"Analytics End DateTime: {cutoff_datetime.strftime('%Y-%m-%d %H:%M:%S')}")
+
+    # Filter data for analytics
+    if data:
+        df_analytics = df.copy()
+        df_analytics = df_analytics[
+            (df_analytics["datetime"] >= analytics_start_datetime) & 
+            (df_analytics["datetime"] <= cutoff_datetime)
+        ]
+        
+        st.subheader("Filtered Data for Analytics")
+        st.write(f"Total records in range: {len(df_analytics)}")
+        st.dataframe(df_analytics)
