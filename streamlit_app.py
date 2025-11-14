@@ -1,21 +1,71 @@
 import streamlit as st
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-import pandas as pd
-import json
+from datetime import datetime
+import pytz
 
-# Load credentials from Streamlit secrets
+# Use your provided authentication variables
 scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-
 creds_dict = st.secrets["service_account"]
 creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
 client = gspread.authorize(creds)
-
 sheet = client.open("baby_tracking").sheet1
-df = pd.DataFrame(sheet.get_all_records())
 
-st.title("Google Sheet Data")
-st.dataframe(df)
+# Get IST date and time
+def get_ist_datetime():
+    ist = pytz.timezone('Asia/Kolkata')
+    now = datetime.now(ist)
+    date_str = now.strftime('%Y-%m-%d')
+    time_str = now.strftime('%H:%M:%S')
+    return date_str, time_str
+
+# Layout: two containers
+container1, container2 = st.columns([1, 2])
+
+with container1:
+    st.header("Add Activity")
+    actions = ['Slept', 'Woke Up', 'Fed', 'Solid Food', 'Potty', 'Diaper Change']
+    for action in actions:
+        if st.button(action):
+            date, time = get_ist_datetime()
+            notes_key = f"notes_{action.replace(' ', '_')}"
+            notes = st.text_input(f"Notes for {action}", key=notes_key)
+            # Only add row when notes is entered or left blank and button pressed; use session state to reduce multiple entries
+            if 'submitted_action' not in st.session_state or st.session_state['submitted_action'] != action:
+                new_row = [date, time, action, notes]
+                sheet.append_row(new_row)
+                st.session_state['submitted_action'] = action
+                st.success(f"Recorded: {action} at {date} {time}")
+
+with container2:
+    st.header("Recent Activity")
+    data = sheet.get_all_values()
+    st.dataframe(data)
+
+
+
+
+##########Old code#########
+
+# import streamlit as st
+# import gspread
+# from oauth2client.service_account import ServiceAccountCredentials
+# import pandas as pd
+# import json
+
+Load credentials from Streamlit secrets
+
+# scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+
+# creds_dict = st.secrets["service_account"]
+# creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+# client = gspread.authorize(creds)
+
+# sheet = client.open("baby_tracking").sheet1
+# df = pd.DataFrame(sheet.get_all_records())
+
+# st.title("Google Sheet Data")
+# st.dataframe(df)
 
 # """
 # Baby Activity - Quick Actions Streamlit App
