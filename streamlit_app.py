@@ -49,7 +49,7 @@ if data:
     import pandas as pd
     df = pd.DataFrame(records, columns=headers)
     
-    edited_df = st.data_editor(df, num_rows="dynamic", key="activity_editor")
+    edited_df = st.data_editor(df, num_rows="dynamic", key="activity_editor", hide_index=True)
     
     if st.button("Save Changes"):
         # Find changed rows by comparing df and edited_df
