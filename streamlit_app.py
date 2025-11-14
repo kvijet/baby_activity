@@ -67,7 +67,7 @@ with container2:
         # Drop 'datetime' column if you don't want to show it
         
 
-        edited_df = st.data_editor(df_recent.drop(columns=["datetime"]), num_rows="dynamic", key="activity_editor", hide_index=True)
+        edited_df = st.data_editor(df_recent, num_rows="dynamic", key="activity_editor", hide_index=True)
         
         if st.button("Save Changes"):
             # Comparison logic as before, but only for filtered df 
