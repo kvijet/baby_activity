@@ -129,3 +129,54 @@ if data:
     st.subheader("Filtered Data for Analytics")
     st.write(f"Total records in range: {len(df_analytics)}")
     st.dataframe(df_analytics)
+    
+    # Split data into daily groups
+    st.subheader("Daily Groups (Development View)")
+    
+    daily_groups = {}
+    for day_offset in range(num_days):
+        day_start = analytics_start_datetime + pd.Timedelta(days=day_offset)
+        day_end = analytics_start_datetime + pd.Timedelta(days=day_offset + 1)
+        
+        day_data = df_analytics[
+            (df_analytics["datetime"] >= day_start) & 
+            (df_analytics["datetime"] < day_end)
+        ].copy()
+        
+        # Check if "Woke Up" appears before "Slept"
+        if not day_data.empty:
+            first_slept = day_data[day_data["Activity"] == "Slept"]["datetime"].min() if "Slept" in day_data["Activity"].values else None
+            first_woke_up = day_data[day_data["Activity"] == "Woke Up"]["datetime"].min() if "Woke Up" in day_data["Activity"].values else None
+            
+            # Add "Slept" at start of day if "Woke Up" comes before first "Slept"
+            if first_woke_up is not None and (first_slept is None or first_woke_up < first_slept):
+                new_row = pd.DataFrame({
+                    "Date": [day_start.strftime('%Y-%m-%d')],
+                    "Time": [day_start.strftime('%H:%M:%S')],
+                    "Activity": ["Slept"],
+                    "Notes": ["Auto-added: Day started with wake up"],
+                    "datetime": [day_start]
+                })
+                day_data = pd.concat([new_row, day_data]).sort_values("datetime")
+            
+            # For days excluding current day, check if "Slept" is not followed by "Woke Up"
+            is_current_day = (day_offset == num_days - 1)
+            if not is_current_day:
+                last_slept = day_data[day_data["Activity"] == "Slept"]["datetime"].max() if "Slept" in day_data["Activity"].values else None
+                if last_slept is not None:
+                    woke_up_after_slept = day_data[(day_data["Activity"] == "Woke Up") & (day_data["datetime"] > last_slept)]
+                    if woke_up_after_slept.empty:
+                        new_row = pd.DataFrame({
+                            "Date": [day_end.strftime('%Y-%m-%d')],
+                            "Time": [day_end.strftime('%H:%M:%S')],
+                            "Activity": ["Woke Up"],
+                            "Notes": ["Auto-added: No wake up found after last sleep"],
+                            "datetime": [day_end]
+                        })
+                        day_data = pd.concat([day_data, new_row]).sort_values("datetime")
+        
+        daily_groups[f"Day {day_offset + 1} ({day_start.strftime('%Y-%m-%d')})"] = day_data
+        
+        st.write(f"**Day {day_offset + 1}: {day_start.strftime('%Y-%m-%d %H:%M')} to {day_end.strftime('%Y-%m-%d %H:%M')}**")
+        st.write(f"Records: {len(day_data)}")
+        st.dataframe(day_data)
