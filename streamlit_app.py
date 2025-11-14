@@ -5,7 +5,7 @@ import pandas as pd
 import json
 
 # Load credentials from Streamlit secrets
-creds_dict = st.secrets["gcp_service_account"]
+creds_dict = st.secrets["service_account"]
 creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
 client = gspread.authorize(creds)
 
