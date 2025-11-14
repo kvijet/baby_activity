@@ -1,1 +1,1 @@
-An attempt to make parenting fun and data driven by tracking baby's activities and hoping preparing for next need of baby based on historical trend. This can't replace mother's instinct or help navigate growth spurts. 
+An app aimed at tracking, monitoring and predicting baby's daily activities for better care giving. 
