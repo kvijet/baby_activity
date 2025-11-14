@@ -65,7 +65,7 @@ with container2:
         
         # Drop 'datetime' column if you don't want to show it
         df_recent = df_recent.drop(columns=["datetime"])
-        
+        st.dataframe(df_recent) # Temporary display of df_recent for debugging an UI error
         edited_df = st.data_editor(df_recent, num_rows="dynamic", key="activity_editor", hide_index=True)
         
         if st.button("Save Changes"):
