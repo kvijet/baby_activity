@@ -66,14 +66,7 @@ with container2:
         
         # Drop 'datetime' column if you don't want to show it
         
-        with st.container():
-            st.subheader("Recent Activities (last 2 days)")
-            st.dataframe(df_recent, hide_index=True) st.subheader("Analytics")
-        day_start_time = st.selectbox(
-            "Select Baby's day start time",
-            options=[f"{hour:02d}:{minute:02d}" for hour in range(0, 24) for minute in (0, 30)],
-            index=18  # 9:00 AM is the 18th item (9*2)
-        )
+
         edited_df = st.data_editor(df_recent, num_rows="dynamic", key="activity_editor", hide_index=True)
         
         if st.button("Save Changes"):
