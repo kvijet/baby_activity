@@ -11,7 +11,7 @@ creds_dict = st.secrets["service_account"]
 creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
 client = gspread.authorize(creds)
 
-sheet = client.open("Sheet1").sheet1
+sheet = client.open("baby_tracking").sheet1
 df = pd.DataFrame(sheet.get_all_records())
 
 st.title("Google Sheet Data")
