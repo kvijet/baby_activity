@@ -47,37 +47,57 @@ with container2:
         headers = data[0]
         records = data[1:]
         import pandas as pd
-        
+
         df = pd.DataFrame(records, columns=headers)
-        
+
         # Combine Date and Time to a single datetime column
         df["datetime"] = pd.to_datetime(df["Date"] + " " + df["Time"])
-        
+
         # Filter for last 2 days in IST
         ist = pytz.timezone('Asia/Kolkata')
         now_ist = datetime.now(ist)
         two_days_ago = now_ist - pd.Timedelta(days=2)
         df["datetime"] = df["datetime"].dt.tz_localize(ist, ambiguous='NaT', nonexistent='shift_forward')
         df_recent = df[df["datetime"] >= two_days_ago]
-        
+
         # Sort descending by datetime
         df_recent = df_recent.sort_values("datetime", ascending=False)
-        
+
         # Drop 'datetime' column if you don't want to show it
-        
         df_recent = df_recent.drop(columns=["datetime"])
-        
+
         edited_df = st.data_editor(df_recent, num_rows="dynamic", key="activity_editor", hide_index=True)
-        
+
         if st.button("Save Changes"):
-            # Comparison logic as before, but only for filtered df 
             original_df = df[df["datetime"] >= two_days_ago].sort_values("datetime", ascending=False).drop(columns=["datetime"])
-            changes = edited_df.compare(original_df)
-            if not changes.empty:
-                for idx in changes.index.get_level_values(0).unique():
-                    sheet_idx = original_df.index[idx] + 2 # mapping filtered idx to sheet row (header + 1-indexed)
-                    sheet.update(f'A{sheet_idx}:{chr(65+len(headers)-1)}{sheet_idx}', [list(edited_df.loc[idx])])
+
+            # Check if rows were added or deleted
+            if len(edited_df) != len(original_df):
+                edited_df_reset = edited_df.reset_index(drop=True)
+                original_df_reset = original_df.reset_index(drop=True)
+            else:
+                edited_df_reset = edited_df
+                original_df_reset = original_df
+
+            changes = edited_df_reset.compare(original_df_reset)
+            if not changes.empty or len(edited_df) != len(original_df):
+                for idx in edited_df_reset.index:
+                    sheet_idx = original_df.index[idx] + 2 if idx < len(original_df) else idx + 2
+                    sheet.update(f'A{sheet_idx}:{chr(65+len(headers)-1)}{sheet_idx}', [list(edited_df_reset.loc[idx])])
                 st.success("Changes saved to Google Sheet!")
+
+                # Refresh table with latest records from Google Sheets
+                data = sheet.get_all_values()
+                if data:
+                    headers = data[0]
+                    records = data[1:]
+                    df = pd.DataFrame(records, columns=headers)
+                    df["datetime"] = pd.to_datetime(df["Date"] + " " + df["Time"])
+                    df["datetime"] = df["datetime"].dt.tz_localize(ist, ambiguous='NaT', nonexistent='shift_forward')
+                    df_recent = df[df["datetime"] >= two_days_ago]
+                    df_recent = df_recent.sort_values("datetime", ascending=False)
+                    df_recent = df_recent.drop(columns=["datetime"])
+                    st.dataframe(df_recent, hide_index=True)
             else:
                 st.info("No changes to save.")
     else:
