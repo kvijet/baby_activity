@@ -71,7 +71,7 @@ if data and len(data) > 1:
 # Display time elapsed since key activities
 st.subheader("⏱️ Time Since Last Activity")
 if df_all is not None and len(df_all) > 0:
-    tracked_activities = ['Woke Up', 'Fed', 'Diaper Change']
+    tracked_activities = ['Woke Up', 'Fed','Solid Food', 'Diaper Change']
     cols = st.columns(len(tracked_activities))
     
     for i, activity in enumerate(tracked_activities):
