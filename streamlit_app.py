@@ -63,41 +63,54 @@ with container2:
         # Sort descending by datetime
         df_recent = df_recent.sort_values("datetime", ascending=False)
 
-        # Drop 'datetime' column if you don't want to show it
-        df_recent = df_recent.drop(columns=["datetime"])
+        # Keep datetime for mapping, but don't show it in editor
+        df_recent_display = df_recent.drop(columns=["datetime"])
 
-        edited_df = st.data_editor(df_recent, num_rows="dynamic", key="activity_editor", hide_index=True)
+        edited_df = st.data_editor(df_recent_display, num_rows="dynamic", key="activity_editor", hide_index=True)
 
         if st.button("Save Changes"):
-            original_df = df[df["datetime"] >= two_days_ago].sort_values("datetime", ascending=False).drop(columns=["datetime"])
+            # Recreate datetime column in edited_df from Date and Time columns
+            edited_df["datetime"] = pd.to_datetime(edited_df["Date"] + " " + edited_df["Time"])
+            edited_df["datetime"] = edited_df["datetime"].dt.tz_localize(ist, ambiguous='NaT', nonexistent='shift_forward')
             
-            # Reset indexes for comparison
-            edited_df_reset = edited_df.reset_index(drop=True)
-            original_df_reset = original_df.reset_index(drop=True)
+            # Get original data with datetime
+            original_df_with_datetime = df[df["datetime"] >= two_days_ago].sort_values("datetime", ascending=False).copy()
             
-            # Check if there are changes (different lengths or different content)
+            # Check if there are changes
             has_changes = False
             
-            if len(edited_df_reset) != len(original_df_reset):
+            if len(edited_df) != len(original_df_with_datetime):
                 has_changes = True
             else:
-                # Only compare if same length
+                # Compare without datetime column
+                original_compare = original_df_with_datetime.drop(columns=["datetime"]).reset_index(drop=True)
+                edited_compare = edited_df.drop(columns=["datetime"]).reset_index(drop=True)
                 try:
-                    changes = edited_df_reset.compare(original_df_reset)
+                    changes = edited_compare.compare(original_compare)
                     has_changes = not changes.empty
                 except:
                     has_changes = True
             
             if has_changes:
-                # Clear and rewrite all rows in the filtered range
-                # Get the starting row number in the sheet
-                start_row = 2  # Assuming row 1 is headers
+                # Create a mapping of datetime to sheet row for the full dataset
+                datetime_to_sheet_row = {}
+                for idx, row in df.iterrows():
+                    datetime_to_sheet_row[row["datetime"]] = idx + 2  # +2 for header and 1-indexing
                 
-                # Write all edited rows back to sheet
-                for idx, row in edited_df_reset.iterrows():
-                    row_values = list(row)
-                    sheet_row = start_row + idx
-                    sheet.update(f'A{sheet_row}:{chr(65+len(row_values)-1)}{sheet_row}', [row_values])
+                # Update rows using datetime matching
+                for idx, edited_row in edited_df.iterrows():
+                    edited_datetime = edited_row["datetime"]
+                    
+                    # Check if this datetime exists in the original sheet
+                    if edited_datetime in datetime_to_sheet_row:
+                        # Update existing row
+                        sheet_row = datetime_to_sheet_row[edited_datetime]
+                        row_values = [edited_row["Date"], edited_row["Time"], edited_row["Action"], edited_row["Notes"]]
+                        sheet.update(f'A{sheet_row}:D{sheet_row}', [row_values])
+                    else:
+                        # New row added, append to the end
+                        row_values = [edited_row["Date"], edited_row["Time"], edited_row["Action"], edited_row["Notes"]]
+                        sheet.append_row(row_values)
                 
                 st.success("Changes saved to Google Sheet!")
                 # Refresh the app to reload data from Google Sheets
