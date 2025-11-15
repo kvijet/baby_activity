@@ -1,0 +1,159 @@
+/* Import baby-friendly fonts */
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap');
+
+/* Main background with soft pastel gradient */
+.stApp {
+    background: linear-gradient(135deg, #fef5f7 0%, #ffe8ec 50%, #ffd9e0 100%) !important;
+    font-family: 'Quicksand', 'Segoe UI', sans-serif !important;
+}
+
+/* Title styling - playful and prominent */
+h1 {
+    color: #ff6b9d !important;
+    font-family: 'Fredoka', 'Quicksand', sans-serif !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    padding: 1.5rem 0 !important;
+    text-shadow: 3px 3px 6px rgba(255, 107, 157, 0.2) !important;
+    font-size: 3rem !important;
+    letter-spacing: 2px !important;
+}
+
+/* Subheader styling - soft and friendly */
+h2, h3 {
+    color: #ff8fab !important;
+    font-family: 'Fredoka', 'Quicksand', sans-serif !important;
+    font-weight: 600 !important;
+    text-shadow: 2px 2px 4px rgba(255, 143, 171, 0.15) !important;
+}
+
+/* Metric cards - baby-themed */
+[data-testid="stMetric"] {
+    background: linear-gradient(135deg, #ffffff 0%, #fff5f7 100%) !important;
+    padding: 1.2rem !important;
+    border-radius: 20px !important;
+    box-shadow: 0 4px 12px rgba(255, 107, 157, 0.15) !important;
+    border: 3px solid #ffd4e0 !important;
+}
+
+[data-testid="stMetricValue"] {
+    font-size: 2.5rem !important;
+    color: #ff6b9d !important;
+    font-weight: 700 !important;
+    font-family: 'Fredoka', sans-serif !important;
+}
+
+[data-testid="stMetricLabel"] {
+    color: #ff8fab !important;
+    font-weight: 600 !important;
+    font-size: 1.1rem !important;
+    font-family: 'Fredoka', sans-serif !important;
+}
+
+/* Button styling - playful and colorful */
+.stButton > button {
+    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 20px !important;
+    padding: 0.8rem 1.5rem !important;
+    font-weight: 700 !important;
+    font-family: 'Fredoka', sans-serif !important;
+    box-shadow: 0 6px 12px rgba(255, 154, 158, 0.3) !important;
+    transition: all 0.3s ease !important;
+    width: 100% !important;
+    margin: 0.3rem 0 !important;
+    font-size: 1rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+}
+
+.stButton > button:hover {
+    background: linear-gradient(135deg, #fecfef 0%, #ff9a9e 100%) !important;
+    box-shadow: 0 8px 16px rgba(255, 154, 158, 0.4) !important;
+    transform: translateY(-3px) scale(1.02) !important;
+}
+
+.stButton > button:active {
+    transform: translateY(0) scale(0.98) !important;
+}
+
+/* Data editor styling - clean and bordered */
+.stDataFrame {
+    background: white !important;
+    border-radius: 15px !important;
+    padding: 1.5rem !important;
+    box-shadow: 0 4px 12px rgba(255, 107, 157, 0.15) !important;
+    border: 3px solid #ffe3e8 !important;
+}
+
+/* Text input styling - soft borders */
+.stTextInput > div > div > input {
+    border-radius: 15px !important;
+    border: 3px solid #ffd4e0 !important;
+    font-family: 'Quicksand', sans-serif !important;
+    padding: 0.8rem !important;
+    background-color: #fffbfc !important;
+    color: #4a5568 !important;
+    font-weight: 500 !important;
+}
+
+.stTextInput > div > div > input:focus {
+    border-color: #ff9a9e !important;
+    box-shadow: 0 0 0 3px rgba(255, 154, 158, 0.2) !important;
+}
+
+/* Success message styling */
+.stSuccess {
+    background: linear-gradient(135deg, #d4f4dd 0%, #c3f0d3 100%) !important;
+    color: #2d5f3f !important;
+    border-radius: 15px !important;
+    font-family: 'Quicksand', sans-serif !important;
+    border: 2px solid #a8e6c1 !important;
+    font-weight: 600 !important;
+}
+
+/* Info message styling */
+.stInfo {
+    background: linear-gradient(135deg, #e3f2fd 0%, #d1e7f8 100%) !important;
+    color: #1e4d7b !important;
+    border-radius: 15px !important;
+    font-family: 'Quicksand', sans-serif !important;
+    border: 2px solid #b3d9f2 !important;
+    font-weight: 600 !important;
+}
+
+/* Error message styling */
+.stError {
+    background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%) !important;
+    color: #c62828 !important;
+    border-radius: 15px !important;
+    border: 2px solid #ffb3ba !important;
+}
+
+/* Divider styling */
+hr {
+    border: none !important;
+    height: 3px !important;
+    background: linear-gradient(90deg, transparent 0%, #ffd4e0 50%, transparent 100%) !important;
+    margin: 2rem 0 !important;
+}
+
+/* Column containers */
+[data-testid="column"] {
+    padding: 0.8rem !important;
+}
+
+/* Sidebar styling (if used in future) */
+[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #fff5f7 0%, #ffe8ec 100%) !important;
+    border-right: 3px solid #ffd4e0 !important;
+}
+
+/* Add cute icons and emojis styling */
+.stMarkdown p {
+    color: #4a5568 !important;
+    font-family: 'Quicksand', sans-serif !important;
+    font-weight: 500 !important;
+    line-height: 1.6 !important;
+}
