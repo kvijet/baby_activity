@@ -61,7 +61,7 @@ if data and len(data) > 1:
         st.warning(f"DEBUG - Cleaned columns: {df_all.columns.tolist()}")
         
         # Verify required columns exist
-        required_columns = ['Date', 'Time', 'Activity']
+        required_columns = ['Date', 'Time', 'Action']  # Changed from 'Activity' to 'Action'
         missing_columns = [col for col in required_columns if col not in df_all.columns]
         
         if missing_columns:
@@ -85,7 +85,7 @@ if df_all is not None and len(df_all) > 0:
     
     for i, activity in enumerate(tracked_activities):
         try:
-            activity_df = df_all[df_all['Activity'] == activity]
+            activity_df = df_all[df_all['Action'] == activity]  # Changed from 'Activity' to 'Action'
             if not activity_df.empty:
                 last_time = activity_df['datetime'].max()
                 time_diff = now_ist - last_time
