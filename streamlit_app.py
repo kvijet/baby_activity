@@ -3,6 +3,7 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 import pytz
+import pandas as pd
 
 st.set_page_config(page_title="Suddu Tracker")
 st.title("Suddu Tracker")
@@ -42,33 +43,54 @@ with container1:
 
 with container2:
     st.header("Recent Activity")
-    data = sheet.get_all_values()
-    if data:
-        headers = data[0]
-        records = data[1:]
-        import pandas as pd
+    
+    # Add refresh button
+    col_refresh, col_save = st.columns([1, 4])
+    with col_refresh:
+        refresh_clicked = st.button("🔄 Refresh", key="refresh_button")
+    
+    # Load data function
+    def load_recent_data():
+        data = sheet.get_all_values()
+        if data:
+            headers = data[0]
+            records = data[1:]
 
-        df = pd.DataFrame(records, columns=headers)
+            df = pd.DataFrame(records, columns=headers)
 
-        # Combine Date and Time to a single datetime column
-        df["datetime"] = pd.to_datetime(df["Date"] + " " + df["Time"])
+            # Combine Date and Time to a single datetime column
+            df["datetime"] = pd.to_datetime(df["Date"] + " " + df["Time"])
 
-        # Filter for last 2 days in IST
-        ist = pytz.timezone('Asia/Kolkata')
-        now_ist = datetime.now(ist)
-        two_days_ago = now_ist - pd.Timedelta(days=2)
-        df["datetime"] = df["datetime"].dt.tz_localize(ist, ambiguous='NaT', nonexistent='shift_forward')
-        df_recent = df[df["datetime"] >= two_days_ago]
+            # Filter for last 2 days in IST
+            ist = pytz.timezone('Asia/Kolkata')
+            now_ist = datetime.now(ist)
+            two_days_ago = now_ist - pd.Timedelta(days=2)
+            df["datetime"] = df["datetime"].dt.tz_localize(ist, ambiguous='NaT', nonexistent='shift_forward')
+            df_recent = df[df["datetime"] >= two_days_ago]
 
-        # Sort descending by datetime
-        df_recent = df_recent.sort_values("datetime", ascending=False)
-
+            # Sort descending by datetime
+            df_recent = df_recent.sort_values("datetime", ascending=False)
+            
+            return df, df_recent, ist, two_days_ago
+        return None, None, None, None
+    
+    # Load data
+    df, df_recent, ist, two_days_ago = load_recent_data()
+    
+    # Create a placeholder for the data editor
+    data_placeholder = st.empty()
+    
+    if df is not None and df_recent is not None:
         # Keep datetime for mapping, but don't show it in editor
         df_recent_display = df_recent.drop(columns=["datetime"])
 
-        edited_df = st.data_editor(df_recent_display, num_rows="dynamic", key="activity_editor", hide_index=True)
+        with data_placeholder.container():
+            edited_df = st.data_editor(df_recent_display, num_rows="dynamic", key="activity_editor", hide_index=True)
 
-        if st.button("Save Changes"):
+        with col_save:
+            save_clicked = st.button("💾 Save Changes", key="save_button")
+        
+        if save_clicked:
             # Recreate datetime column in edited_df from Date and Time columns
             edited_df["datetime"] = pd.to_datetime(edited_df["Date"] + " " + edited_df["Time"])
             edited_df["datetime"] = edited_df["datetime"].dt.tz_localize(ist, ambiguous='NaT', nonexistent='shift_forward')
@@ -138,7 +160,6 @@ with container2:
                         sheet.append_row(row_values)
                 
                 st.success("Changes saved to Google Sheet!")
-                # Refresh the app to reload data from Google Sheets
                 st.rerun()
             else:
                 st.info("No changes to save.")
