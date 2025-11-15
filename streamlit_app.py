@@ -49,8 +49,18 @@ if data and len(data) > 1:
         headers = data[0]
         records = data[1:]
         df_all = pd.DataFrame(records, columns=headers)
-        df_all["datetime"] = pd.to_datetime(df_all["Date"] + " " + df_all["Time"])
-        df_all["datetime"] = df_all["datetime"].dt.tz_localize(ist, ambiguous='NaT', nonexistent='shift_forward')
+        
+        # Verify required columns exist
+        required_columns = ['Date', 'Time', 'Activity']
+        missing_columns = [col for col in required_columns if col not in df_all.columns]
+        
+        if missing_columns:
+            st.error(f"Missing required columns in sheet: {', '.join(missing_columns)}")
+            st.info(f"Available columns: {', '.join(df_all.columns.tolist())}")
+            df_all = None
+        else:
+            df_all["datetime"] = pd.to_datetime(df_all["Date"] + " " + df_all["Time"])
+            df_all["datetime"] = df_all["datetime"].dt.tz_localize(ist, ambiguous='NaT', nonexistent='shift_forward')
     except Exception as e:
         st.error(f"Error processing data: {str(e)}")
         df_all = None
@@ -62,22 +72,26 @@ if df_all is not None:
     cols = st.columns(len(tracked_activities))
     
     for i, activity in enumerate(tracked_activities):
-        activity_df = df_all[df_all['Activity'] == activity]
-        if not activity_df.empty:
-            last_time = activity_df['datetime'].max()
-            time_diff = now_ist - last_time
-            
-            hours = int(time_diff.total_seconds() // 3600)
-            minutes = int((time_diff.total_seconds() % 3600) // 60)
-            
+        try:
+            activity_df = df_all[df_all['Activity'] == activity]
+            if not activity_df.empty:
+                last_time = activity_df['datetime'].max()
+                time_diff = now_ist - last_time
+                
+                hours = int(time_diff.total_seconds() // 3600)
+                minutes = int((time_diff.total_seconds() % 3600) // 60)
+                
+                with cols[i]:
+                    st.metric(
+                        label=activity,
+                        value=f"{hours}h {minutes}m"
+                    )
+            else:
+                with cols[i]:
+                    st.metric(label=activity, value="No data")
+        except Exception as e:
             with cols[i]:
-                st.metric(
-                    label=activity,
-                    value=f"{hours}h {minutes}m"
-                )
-        else:
-            with cols[i]:
-                st.metric(label=activity, value="No data")
+                st.metric(label=activity, value="Error")
 else:
     st.info("No activity data available yet.")
 
