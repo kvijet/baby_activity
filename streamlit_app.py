@@ -23,6 +23,43 @@ def get_ist_datetime():
     time_str = now.strftime('%H:%M:%S')
     return date_str, time_str
 
+# Display time elapsed since key activities
+st.subheader("⏱️ Time Since Last Activity")
+data = sheet.get_all_values()
+if data and len(data) > 1:
+    headers = data[0]
+    records = data[1:]
+    df_all = pd.DataFrame(records, columns=headers)
+    df_all["datetime"] = pd.to_datetime(df_all["Date"] + " " + df_all["Time"])
+    ist = pytz.timezone('Asia/Kolkata')
+    df_all["datetime"] = df_all["datetime"].dt.tz_localize(ist, ambiguous='NaT', nonexistent='shift_forward')
+    now_ist = datetime.now(ist)
+    
+    tracked_activities = ['Woke Up', 'Fed', 'Diaper Change']
+    cols = st.columns(len(tracked_activities))
+    
+    for i, activity in enumerate(tracked_activities):
+        activity_df = df_all[df_all['Activity'] == activity]
+        if not activity_df.empty:
+            last_time = activity_df['datetime'].max()
+            time_diff = now_ist - last_time
+            
+            hours = int(time_diff.total_seconds() // 3600)
+            minutes = int((time_diff.total_seconds() % 3600) // 60)
+            
+            with cols[i]:
+                st.metric(
+                    label=activity,
+                    value=f"{hours}h {minutes}m"
+                )
+        else:
+            with cols[i]:
+                st.metric(label=activity, value="No data")
+else:
+    st.info("No activity data available yet.")
+
+st.divider()
+
 # Layout: two containers
 container1, container2 = st.columns([1, 2])
 
