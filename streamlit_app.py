@@ -23,18 +23,37 @@ def get_ist_datetime():
     time_str = now.strftime('%H:%M:%S')
     return date_str, time_str
 
+# Function to load data with caching
+@st.cache_data(ttl=60)  # Cache for 60 seconds
+def load_sheet_data(_sheet):
+    try:
+        data = _sheet.get_all_values()
+        return data
+    except Exception as e:
+        st.error(f"Error loading data from Google Sheets: {str(e)}")
+        return None
+
 # Load all data once at the beginning
-data = sheet.get_all_values()
+try:
+    data = load_sheet_data(sheet)
+except Exception as e:
+    st.error(f"Failed to connect to Google Sheets: {str(e)}")
+    data = None
+
 df_all = None
 ist = pytz.timezone('Asia/Kolkata')
 now_ist = datetime.now(ist)
 
 if data and len(data) > 1:
-    headers = data[0]
-    records = data[1:]
-    df_all = pd.DataFrame(records, columns=headers)
-    df_all["datetime"] = pd.to_datetime(df_all["Date"] + " " + df_all["Time"])
-    df_all["datetime"] = df_all["datetime"].dt.tz_localize(ist, ambiguous='NaT', nonexistent='shift_forward')
+    try:
+        headers = data[0]
+        records = data[1:]
+        df_all = pd.DataFrame(records, columns=headers)
+        df_all["datetime"] = pd.to_datetime(df_all["Date"] + " " + df_all["Time"])
+        df_all["datetime"] = df_all["datetime"].dt.tz_localize(ist, ambiguous='NaT', nonexistent='shift_forward')
+    except Exception as e:
+        st.error(f"Error processing data: {str(e)}")
+        df_all = None
 
 # Display time elapsed since key activities
 st.subheader("⏱️ Time Since Last Activity")
