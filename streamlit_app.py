@@ -48,20 +48,13 @@ if data and len(data) > 1:
         headers = data[0]
         records = data[1:]
         
-        # Debug: show actual headers
-        st.warning(f"DEBUG - Sheet headers: {headers}")
-        st.warning(f"DEBUG - First data row: {records[0] if records else 'No records'}")
-        
         df_all = pd.DataFrame(records, columns=headers)
         
         # Strip whitespace from column names
         df_all.columns = df_all.columns.str.strip()
         
-        # Debug: show cleaned headers
-        st.warning(f"DEBUG - Cleaned columns: {df_all.columns.tolist()}")
-        
         # Verify required columns exist
-        required_columns = ['Date', 'Time', 'Action']  # Changed from 'Activity' to 'Action'
+        required_columns = ['Date', 'Time', 'Action']
         missing_columns = [col for col in required_columns if col not in df_all.columns]
         
         if missing_columns:
@@ -73,8 +66,6 @@ if data and len(data) > 1:
             df_all["datetime"] = df_all["datetime"].dt.tz_localize(ist, ambiguous='NaT', nonexistent='shift_forward')
     except Exception as e:
         st.error(f"Error processing data: {str(e)}")
-        import traceback
-        st.error(traceback.format_exc())
         df_all = None
 
 # Display time elapsed since key activities
