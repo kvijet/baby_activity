@@ -100,19 +100,8 @@ with container2:
                     sheet.update(f'A{sheet_row}:{chr(65+len(row_values)-1)}{sheet_row}', [row_values])
                 
                 st.success("Changes saved to Google Sheet!")
-
-                # Refresh table with latest records from Google Sheets
-                data = sheet.get_all_values()
-                if data:
-                    headers = data[0]
-                    records = data[1:]
-                    df = pd.DataFrame(records, columns=headers)
-                    df["datetime"] = pd.to_datetime(df["Date"] + " " + df["Time"])
-                    df["datetime"] = df["datetime"].dt.tz_localize(ist, ambiguous='NaT', nonexistent='shift_forward')
-                    df_recent = df[df["datetime"] >= two_days_ago]
-                    df_recent = df_recent.sort_values("datetime", ascending=False)
-                    df_recent = df_recent.drop(columns=["datetime"])
-                    st.dataframe(df_recent, hide_index=True)
+                # Refresh the app to reload data from Google Sheets
+                st.rerun()
             else:
                 st.info("No changes to save.")
     else:
