@@ -79,6 +79,16 @@ with container2:
                 edited_df_reset = edited_df
                 original_df_reset = original_df
 
+            # Ensure columns are the same and in the same order
+            common_cols = [col for col in edited_df_reset.columns if col in original_df_reset.columns]
+            edited_df_reset = edited_df_reset[common_cols]
+            original_df_reset = original_df_reset[common_cols]
+
+            # Reset index to ensure alignment
+            edited_df_reset = edited_df_reset.reset_index(drop=True)
+            original_df_reset = original_df_reset.reset_index(drop=True)
+
+            # Now compare
             changes = edited_df_reset.compare(original_df_reset)
             if not changes.empty or len(edited_df) != len(original_df):
                 for idx in edited_df_reset.index:
