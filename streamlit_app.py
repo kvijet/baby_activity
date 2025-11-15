@@ -23,18 +23,22 @@ def get_ist_datetime():
     time_str = now.strftime('%H:%M:%S')
     return date_str, time_str
 
-# Display time elapsed since key activities
-st.subheader("⏱️ Time Since Last Activity")
+# Load all data once at the beginning
 data = sheet.get_all_values()
+df_all = None
+ist = pytz.timezone('Asia/Kolkata')
+now_ist = datetime.now(ist)
+
 if data and len(data) > 1:
     headers = data[0]
     records = data[1:]
     df_all = pd.DataFrame(records, columns=headers)
     df_all["datetime"] = pd.to_datetime(df_all["Date"] + " " + df_all["Time"])
-    ist = pytz.timezone('Asia/Kolkata')
     df_all["datetime"] = df_all["datetime"].dt.tz_localize(ist, ambiguous='NaT', nonexistent='shift_forward')
-    now_ist = datetime.now(ist)
-    
+
+# Display time elapsed since key activities
+st.subheader("⏱️ Time Since Last Activity")
+if df_all is not None:
     tracked_activities = ['Woke Up', 'Fed', 'Diaper Change']
     cols = st.columns(len(tracked_activities))
     
@@ -88,27 +92,15 @@ with container2:
     
     # Load data function
     def load_recent_data():
-        data = sheet.get_all_values()
-        if data:
-            headers = data[0]
-            records = data[1:]
-
-            df = pd.DataFrame(records, columns=headers)
-
-            # Combine Date and Time to a single datetime column
-            df["datetime"] = pd.to_datetime(df["Date"] + " " + df["Time"])
-
+        if df_all is not None:
             # Filter for last 2 days in IST
-            ist = pytz.timezone('Asia/Kolkata')
-            now_ist = datetime.now(ist)
             two_days_ago = now_ist - pd.Timedelta(days=2)
-            df["datetime"] = df["datetime"].dt.tz_localize(ist, ambiguous='NaT', nonexistent='shift_forward')
-            df_recent = df[df["datetime"] >= two_days_ago]
+            df_recent = df_all[df_all["datetime"] >= two_days_ago]
 
             # Sort descending by datetime
             df_recent = df_recent.sort_values("datetime", ascending=False).reset_index(drop=True)
             
-            return df, df_recent, ist, two_days_ago
+            return df_all, df_recent, ist, two_days_ago
         return None, None, None, None
     
     # Load data
