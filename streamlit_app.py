@@ -70,30 +70,35 @@ with container2:
 
         if st.button("Save Changes"):
             original_df = df[df["datetime"] >= two_days_ago].sort_values("datetime", ascending=False).drop(columns=["datetime"])
-
-            # Check if rows were added or deleted
-            if len(edited_df) != len(original_df):
-                edited_df_reset = edited_df.reset_index(drop=True)
-                original_df_reset = original_df.reset_index(drop=True)
+            
+            # Reset indexes for comparison
+            edited_df_reset = edited_df.reset_index(drop=True)
+            original_df_reset = original_df.reset_index(drop=True)
+            
+            # Check if there are changes (different lengths or different content)
+            has_changes = False
+            
+            if len(edited_df_reset) != len(original_df_reset):
+                has_changes = True
             else:
-                edited_df_reset = edited_df
-                original_df_reset = original_df
-
-            # Ensure columns are the same and in the same order
-            common_cols = [col for col in edited_df_reset.columns if col in original_df_reset.columns]
-            edited_df_reset = edited_df_reset[common_cols]
-            original_df_reset = original_df_reset[common_cols]
-
-            # Reset index to ensure alignment
-            edited_df_reset = edited_df_reset.reset_index(drop=True)
-            original_df_reset = original_df_reset.reset_index(drop=True)
-
-            # Now compare
-            changes = edited_df_reset.compare(original_df_reset)
-            if not changes.empty or len(edited_df) != len(original_df):
-                for idx in edited_df_reset.index:
-                    sheet_idx = original_df.index[idx] + 2 if idx < len(original_df) else idx + 2
-                    sheet.update(f'A{sheet_idx}:{chr(65+len(headers)-1)}{sheet_idx}', [list(edited_df_reset.loc[idx])])
+                # Only compare if same length
+                try:
+                    changes = edited_df_reset.compare(original_df_reset)
+                    has_changes = not changes.empty
+                except:
+                    has_changes = True
+            
+            if has_changes:
+                # Clear and rewrite all rows in the filtered range
+                # Get the starting row number in the sheet
+                start_row = 2  # Assuming row 1 is headers
+                
+                # Write all edited rows back to sheet
+                for idx, row in edited_df_reset.iterrows():
+                    row_values = list(row)
+                    sheet_row = start_row + idx
+                    sheet.update(f'A{sheet_row}:{chr(65+len(row_values)-1)}{sheet_row}', [row_values])
+                
                 st.success("Changes saved to Google Sheet!")
 
                 # Refresh table with latest records from Google Sheets
