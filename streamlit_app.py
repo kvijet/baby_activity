@@ -65,7 +65,7 @@ container1, container2 = st.columns([1, 2])
 
 with container1:
     st.header("Add Activity")
-    actions = ['Slept', 'Woke Up', 'Fed', 'Solid Food', 'Potty', 'Diaper Change']
+    actions = ['Slept', 'Woke Up','Water', 'Fed', 'Solid Food', 'Potty', 'Diaper Change']
     for action in actions:
         if st.button(action):
             date, time = get_ist_datetime()
