@@ -100,11 +100,32 @@ with container2:
                 # Get column names from the dataframe (excluding datetime)
                 data_columns = [col for col in edited_df.columns if col != "datetime"]
                 
-                # Update rows using datetime matching
+                # Find rows to delete (in original but not in edited)
+                original_datetimes = set(original_df_with_datetime["datetime"])
+                edited_datetimes = set(edited_df["datetime"])
+                deleted_datetimes = original_datetimes - edited_datetimes
+                
+                # Delete rows (in reverse order to avoid row number shifting)
+                rows_to_delete = sorted([datetime_to_sheet_row[dt] for dt in deleted_datetimes], reverse=True)
+                for sheet_row in rows_to_delete:
+                    sheet.delete_rows(sheet_row)
+                
+                # Update the datetime_to_sheet_row mapping after deletions
+                # Reload the sheet to get accurate row numbers
+                data = sheet.get_all_values()
+                df_refreshed = pd.DataFrame(data[1:], columns=data[0])
+                df_refreshed["datetime"] = pd.to_datetime(df_refreshed["Date"] + " " + df_refreshed["Time"])
+                df_refreshed["datetime"] = df_refreshed["datetime"].dt.tz_localize(ist, ambiguous='NaT', nonexistent='shift_forward')
+                
+                datetime_to_sheet_row = {}
+                for idx, row in df_refreshed.iterrows():
+                    datetime_to_sheet_row[row["datetime"]] = idx + 2
+                
+                # Update or add rows using datetime matching
                 for idx, edited_row in edited_df.iterrows():
                     edited_datetime = edited_row["datetime"]
                     
-                    # Check if this datetime exists in the original sheet
+                    # Check if this datetime exists in the sheet
                     if edited_datetime in datetime_to_sheet_row:
                         # Update existing row
                         sheet_row = datetime_to_sheet_row[edited_datetime]
