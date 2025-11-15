@@ -69,7 +69,7 @@ with container2:
             df_recent = df[df["datetime"] >= two_days_ago]
 
             # Sort descending by datetime
-            df_recent = df_recent.sort_values("datetime", ascending=False)
+            df_recent = df_recent.sort_values("datetime", ascending=False).reset_index(drop=True)
             
             return df, df_recent, ist, two_days_ago
         return None, None, None, None
@@ -160,7 +160,8 @@ with container2:
                         sheet.append_row(row_values)
                 
                 st.success("Changes saved to Google Sheet!")
-                st.rerun()
+                # Trigger refresh logic by setting a session state variable
+                st.session_state["refresh_button"] = True
             else:
                 st.info("No changes to save.")
     else:
