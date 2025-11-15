@@ -88,28 +88,61 @@ if data and len(data) > 1:
 # Display time elapsed since key activities
 st.subheader("⏱️ Time Since Last Activity")
 if df_all is not None and len(df_all) > 0:
-    tracked_activities = ['Woke Up','Slept', 'Fed','Solid Food', 'Diaper Change']
-    cols = st.columns(len(tracked_activities))
-    
-    for i, activity in enumerate(tracked_activities):
+    tracked_activities = ['Fed', 'Solid Food', 'Diaper Change']
+    cols = st.columns(len(tracked_activities) + 1)
+
+    # Handle Woke Up/Slept logic
+    try:
+        woke_df = df_all[df_all['Action'] == 'Woke Up']
+        slept_df = df_all[df_all['Action'] == 'Slept']
+        last_woke = woke_df['datetime'].max() if not woke_df.empty else None
+        last_slept = slept_df['datetime'].max() if not slept_df.empty else None
+
+        # Determine which happened most recently
+        if last_woke and last_slept:
+            if last_woke > last_slept:
+                last_activity = 'Woke Up'
+                last_time = last_woke
+            else:
+                last_activity = 'Slept'
+                last_time = last_slept
+        elif last_woke:
+            last_activity = 'Woke Up'
+            last_time = last_woke
+        elif last_slept:
+            last_activity = 'Slept'
+            last_time = last_slept
+        else:
+            last_activity = None
+            last_time = None
+
+        with cols[0]:
+            if last_time:
+                time_diff = now_ist - last_time
+                hours = int(time_diff.total_seconds() // 3600)
+                minutes = int((time_diff.total_seconds() % 3600) // 60)
+                st.metric(label=f"{last_activity}", value=f"{hours}h {minutes}m")
+            else:
+                st.metric(label="Sleep/Wake", value="No data")
+    except Exception:
+        with cols[0]:
+            st.metric(label="Sleep/Wake", value="Error")
+
+    # Handle other activities
+    for i, activity in enumerate(tracked_activities, start=1):
         try:
-            activity_df = df_all[df_all['Action'] == activity]  # Changed from 'Activity' to 'Action'
+            activity_df = df_all[df_all['Action'] == activity]
             if not activity_df.empty:
                 last_time = activity_df['datetime'].max()
                 time_diff = now_ist - last_time
-                
                 hours = int(time_diff.total_seconds() // 3600)
                 minutes = int((time_diff.total_seconds() % 3600) // 60)
-                
                 with cols[i]:
-                    st.metric(
-                        label=activity,
-                        value=f"{hours}h {minutes}m"
-                    )
+                    st.metric(label=activity, value=f"{hours}h {minutes}m")
             else:
                 with cols[i]:
                     st.metric(label=activity, value="No data")
-        except Exception as e:
+        except Exception:
             with cols[i]:
                 st.metric(label=activity, value="Error")
 else:
