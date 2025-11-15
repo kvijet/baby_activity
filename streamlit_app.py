@@ -35,10 +35,6 @@ def load_sheet_data(_sheet):
 # Load all data once at the beginning
 try:
     data = load_sheet_data(sheet)
-    if data:
-        st.success(f"✅ Loaded {len(data)} rows from Google Sheets")
-    else:
-        st.warning("⚠️ No data returned from Google Sheets")
 except Exception as e:
     st.error(f"Failed to connect to Google Sheets: {str(e)}")
     data = None
@@ -51,7 +47,6 @@ if data and len(data) > 1:
     try:
         headers = data[0]
         records = data[1:]
-        st.info(f"Headers found: {headers}")
         df_all = pd.DataFrame(records, columns=headers)
         
         # Verify required columns exist
@@ -65,18 +60,13 @@ if data and len(data) > 1:
         else:
             df_all["datetime"] = pd.to_datetime(df_all["Date"] + " " + df_all["Time"])
             df_all["datetime"] = df_all["datetime"].dt.tz_localize(ist, ambiguous='NaT', nonexistent='shift_forward')
-            st.success(f"✅ Processed {len(df_all)} records")
     except Exception as e:
         st.error(f"Error processing data: {str(e)}")
         df_all = None
-elif data and len(data) == 1:
-    st.warning("⚠️ Sheet only contains headers, no data rows")
-else:
-    st.warning("⚠️ No data loaded from sheet")
 
 # Display time elapsed since key activities
 st.subheader("⏱️ Time Since Last Activity")
-if df_all is not None:
+if df_all is not None and len(df_all) > 0:
     tracked_activities = ['Woke Up', 'Fed', 'Diaper Change']
     cols = st.columns(len(tracked_activities))
     
@@ -130,7 +120,8 @@ with container2:
     # Add refresh button
     col_refresh, col_save = st.columns([1, 4])
     with col_refresh:
-        refresh_clicked = st.button("🔄 Refresh", key="refresh_button")
+        if st.button("🔄 Refresh", key="refresh_button"):
+            st.rerun()
     
     # Load data function
     def load_recent_data():
