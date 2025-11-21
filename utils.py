@@ -164,3 +164,54 @@ def save_changes_to_sheet(sheet, df, df_recent, edited_df, two_days_ago, ist):
         return True  # Changes saved
     else:
         return False  # No changes
+
+def calculate_daily_summaries(df_all, ist, days=3):
+    """Calculate daily summaries for the last N days"""
+    if df_all is None or len(df_all) == 0:
+        return None
+    
+    from datetime import datetime, timedelta
+    
+    now_ist = datetime.now(ist)
+    summaries = []
+    
+    for i in range(days):
+        day_date = (now_ist - timedelta(days=i)).date()
+        day_df = df_all[df_all['datetime'].dt.date == day_date]
+        
+        # Count activities
+        fed_count = len(day_df[day_df['Action'] == 'Fed'])
+        solid_food_count = len(day_df[day_df['Action'] == 'Solid Food'])
+        diaper_count = len(day_df[day_df['Action'] == 'Diaper Change'])
+        
+        # Calculate total sleep duration
+        sleep_df = day_df[day_df['Action'].isin(['Slept', 'Woke Up'])].sort_values('datetime')
+        total_sleep_minutes = 0
+        
+        if len(sleep_df) > 0:
+            current_sleep_start = None
+            for _, row in sleep_df.iterrows():
+                if row['Action'] == 'Slept':
+                    current_sleep_start = row['datetime']
+                elif row['Action'] == 'Woke Up' and current_sleep_start:
+                    sleep_duration = (row['datetime'] - current_sleep_start).total_seconds() / 60
+                    total_sleep_minutes += sleep_duration
+                    current_sleep_start = None
+            
+            # If still sleeping (no wake up after last sleep)
+            if current_sleep_start and i == 0:
+                sleep_duration = (now_ist - current_sleep_start).total_seconds() / 60
+                total_sleep_minutes += sleep_duration
+        
+        sleep_hours = int(total_sleep_minutes // 60)
+        sleep_mins = int(total_sleep_minutes % 60)
+        
+        summaries.append({
+            'Date': day_date.strftime('%d-%b-%Y'),
+            'Fed': fed_count,
+            'Solid Food': solid_food_count,
+            'Diaper': diaper_count,
+            'Sleep': f"{sleep_hours}h {sleep_mins}m"
+        })
+    
+    return summaries

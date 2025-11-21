@@ -10,7 +10,8 @@ from utils import (
     process_dataframe,
     load_recent_data,
     save_changes_to_sheet,
-    load_css
+    load_css,
+    calculate_daily_summaries
 )
 
 st.set_page_config(
@@ -157,3 +158,26 @@ with container2:
                 st.info("No changes to save.")
     else:
         st.info("No data found.")
+
+st.divider()
+
+# Daily Summary Section
+st.header("📊 Daily Summary (Last 3 Days)")
+
+if df_all is not None and len(df_all) > 0:
+    summaries = calculate_daily_summaries(df_all, ist, days=3)
+    
+    if summaries:
+        summary_cols = st.columns(3)
+        
+        for idx, summary in enumerate(summaries):
+            with summary_cols[idx]:
+                st.subheader(summary['Date'])
+                st.metric("🍼 Fed", summary['Fed'])
+                st.metric("🥘 Solid Food", summary['Solid Food'])
+                st.metric("🚼 Diaper Changes", summary['Diaper'])
+                st.metric("😴 Total Sleep", summary['Sleep'])
+    else:
+        st.info("No summary data available.")
+else:
+    st.info("No activity data available yet.")
