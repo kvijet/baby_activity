@@ -1,65 +1,66 @@
 /* Import baby-friendly fonts */
 @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap');
 
-/* Main background with soft blue gradient */
+/* Main background with Matrix-style black gradient */
 .stApp {
-    background: linear-gradient(135deg, #f0f7ff 0%, #e3f2fd 50%, #bbdefb 100%) !important;
+    background: linear-gradient(135deg, #000000 0%, #0a0a0a 50%, #001a00 100%) !important;
     font-family: 'Quicksand', 'Segoe UI', sans-serif !important;
 }
 
-/* Title styling - playful and prominent with better contrast */
+/* Title styling - Matrix green with glow effect */
 h1 {
-    color: #1565c0 !important;
+    color: #00ff41 !important;
     font-family: 'Fredoka', 'Quicksand', sans-serif !important;
     font-weight: 700 !important;
     text-align: center !important;
     padding: 1.5rem 0 !important;
-    text-shadow: 3px 3px 6px rgba(21, 101, 192, 0.2) !important;
+    text-shadow: 0 0 10px #00ff41, 0 0 20px #00ff41, 0 0 30px #00ff41 !important;
     font-size: 3rem !important;
     letter-spacing: 2px !important;
 }
 
-/* Subheader styling - darker for better readability */
+/* Subheader styling - bright green */
 h2, h3 {
-    color: #1976d2 !important;
+    color: #00ff41 !important;
     font-family: 'Fredoka', 'Quicksand', sans-serif !important;
     font-weight: 600 !important;
-    text-shadow: 2px 2px 4px rgba(25, 118, 210, 0.15) !important;
+    text-shadow: 0 0 8px #00ff41, 0 0 15px #00ff41 !important;
 }
 
-/* Metric cards - white background with colored border */
+/* Metric cards - dark background with green border and glow */
 [data-testid="stMetric"] {
-    background: #ffffff !important;
+    background: #0a0a0a !important;
     padding: 1.2rem !important;
     border-radius: 20px !important;
-    box-shadow: 0 4px 12px rgba(21, 101, 192, 0.2) !important;
-    border: 3px solid #64b5f6 !important;
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.3), 0 4px 12px rgba(0, 255, 65, 0.2) !important;
+    border: 3px solid #00ff41 !important;
 }
 
 [data-testid="stMetricValue"] {
     font-size: 2.5rem !important;
-    color: #1976d2 !important;
+    color: #00ff41 !important;
     font-weight: 700 !important;
     font-family: 'Fredoka', sans-serif !important;
+    text-shadow: 0 0 8px #00ff41 !important;
 }
 
 [data-testid="stMetricLabel"] {
-    color: #0d47a1 !important;
+    color: #00cc33 !important;
     font-weight: 600 !important;
     font-size: 1.1rem !important;
     font-family: 'Fredoka', sans-serif !important;
 }
 
-/* Button styling - vibrant blue colors with white text */
+/* Button styling - Matrix green with glow effect */
 .stButton > button {
-    background: linear-gradient(135deg, #42a5f5 0%, #64b5f6 100%) !important;
-    color: #ffffff !important;
-    border: none !important;
+    background: linear-gradient(135deg, #003300 0%, #006600 100%) !important;
+    color: #00ff41 !important;
+    border: 2px solid #00ff41 !important;
     border-radius: 20px !important;
     padding: 0.8rem 1.5rem !important;
     font-weight: 700 !important;
     font-family: 'Fredoka', sans-serif !important;
-    box-shadow: 0 6px 12px rgba(66, 165, 245, 0.4) !important;
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.4), 0 6px 12px rgba(0, 255, 65, 0.3) !important;
     transition: all 0.3s ease !important;
     width: 100% !important;
     margin: 0.3rem 0 !important;
@@ -69,75 +70,80 @@ h2, h3 {
 }
 
 .stButton > button:hover {
-    background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%) !important;
-    box-shadow: 0 8px 16px rgba(25, 118, 210, 0.5) !important;
+    background: linear-gradient(135deg, #006600 0%, #009900 100%) !important;
+    box-shadow: 0 0 25px rgba(0, 255, 65, 0.6), 0 8px 16px rgba(0, 255, 65, 0.5) !important;
     transform: translateY(-3px) scale(1.02) !important;
+    text-shadow: 0 0 10px #00ff41 !important;
 }
 
 .stButton > button:active {
     transform: translateY(0) scale(0.98) !important;
 }
 
-/* Data editor styling - white background */
+/* Data editor styling - dark background with green glow */
 .stDataFrame {
-    background: #ffffff !important;
+    background: #0a0a0a !important;
     border-radius: 15px !important;
     padding: 1.5rem !important;
-    box-shadow: 0 4px 12px rgba(21, 101, 192, 0.2) !important;
-    border: 3px solid #64b5f6 !important;
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.3), 0 4px 12px rgba(0, 255, 65, 0.2) !important;
+    border: 3px solid #00ff41 !important;
 }
 
-/* Text input styling - white background with darker text */
+/* Text input styling - dark background with green text and border */
 .stTextInput > div > div > input {
     border-radius: 15px !important;
-    border: 3px solid #64b5f6 !important;
+    border: 3px solid #00cc33 !important;
     font-family: 'Quicksand', sans-serif !important;
     padding: 0.8rem !important;
-    background-color: #ffffff !important;
-    color: #2d2d2d !important;
+    background-color: #0a0a0a !important;
+    color: #00ff41 !important;
     font-weight: 600 !important;
 }
 
 .stTextInput > div > div > input:focus {
-    border-color: #1976d2 !important;
-    box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.2) !important;
+    border-color: #00ff41 !important;
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.5) !important;
 }
 
-/* Success message styling - darker text */
+/* Success message styling - bright green */
 .stSuccess {
-    background: linear-gradient(135deg, #c8e6c9 0%, #a5d6a7 100%) !important;
-    color: #1b5e20 !important;
+    background: linear-gradient(135deg, #003300 0%, #004d00 100%) !important;
+    color: #00ff41 !important;
     border-radius: 15px !important;
     font-family: 'Quicksand', sans-serif !important;
-    border: 2px solid #81c784 !important;
+    border: 2px solid #00ff41 !important;
     font-weight: 700 !important;
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.3) !important;
 }
 
-/* Info message styling - darker text */
+/* Info message styling - teal green */
 .stInfo {
-    background: linear-gradient(135deg, #bbdefb 0%, #90caf9 100%) !important;
-    color: #0d47a1 !important;
+    background: linear-gradient(135deg, #001a1a 0%, #003333 100%) !important;
+    color: #00ffcc !important;
     border-radius: 15px !important;
     font-family: 'Quicksand', sans-serif !important;
-    border: 2px solid #64b5f6 !important;
+    border: 2px solid #00ffcc !important;
     font-weight: 700 !important;
+    box-shadow: 0 0 15px rgba(0, 255, 204, 0.3) !important;
 }
 
-/* Error message styling - darker text */
+/* Error message styling - red with dark background */
 .stError {
-    background: linear-gradient(135deg, #ffcdd2 0%, #ef9a9a 100%) !important;
-    color: #b71c1c !important;
+    background: linear-gradient(135deg, #1a0000 0%, #330000 100%) !important;
+    color: #ff3333 !important;
     border-radius: 15px !important;
-    border: 2px solid #e57373 !important;
+    border: 2px solid #ff3333 !important;
     font-weight: 700 !important;
+    box-shadow: 0 0 15px rgba(255, 51, 51, 0.3) !important;
 }
 
-/* Divider styling */
+/* Divider styling - glowing green line */
 hr {
     border: none !important;
-    height: 3px !important;
-    background: linear-gradient(90deg, transparent 0%, #42a5f5 50%, transparent 100%) !important;
+    height: 2px !important;
+    background: linear-gradient(90deg, transparent 0%, #00ff41 50%, transparent 100%) !important;
     margin: 2rem 0 !important;
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.5) !important;
 }
 
 /* Column containers */
@@ -147,24 +153,25 @@ hr {
 
 /* Sidebar styling (if used in future) */
 [data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #f0f7ff 0%, #e3f2fd 100%) !important;
-    border-right: 3px solid #64b5f6 !important;
+    background: linear-gradient(180deg, #000000 0%, #001a00 100%) !important;
+    border-right: 3px solid #00ff41 !important;
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.2) !important;
 }
 
-/* Markdown text - darker for readability */
+/* Markdown text - bright green for readability */
 .stMarkdown p {
-    color: #2d2d2d !important;
+    color: #00ff41 !important;
     font-family: 'Quicksand', sans-serif !important;
     font-weight: 600 !important;
     line-height: 1.6 !important;
 }
 
-/* Table text - darker for readability */
+/* Table text - bright green */
 table {
-    color: #2d2d2d !important;
+    color: #00ff41 !important;
 }
 
-/* Data editor cells - dark text */
+/* Data editor cells - bright green text */
 [data-testid="stDataFrameResizable"] {
-    color: #2d2d2d !important;
+    color: #00ff41 !important;
 }
