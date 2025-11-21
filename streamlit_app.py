@@ -123,6 +123,7 @@ if df_all is not None and len(df_all) > 0:
                 hours = int(time_diff.total_seconds() // 3600)
                 minutes = int((time_diff.total_seconds() % 3600) // 60)
                 st.metric(label=f"{last_activity}", value=f"{hours}h {minutes}m")
+                st.caption(f"Last at: {last_time.strftime('%d-%b %I:%M %p')}")
             else:
                 st.metric(label="Sleep/Wake", value="No data")
     except Exception:
@@ -140,6 +141,7 @@ if df_all is not None and len(df_all) > 0:
                 minutes = int((time_diff.total_seconds() % 3600) // 60)
                 with cols[i]:
                     st.metric(label=activity, value=f"{hours}h {minutes}m")
+                    st.caption(f"Last at: {last_time.strftime('%d-%b %I:%M %p')}")
             else:
                 with cols[i]:
                     st.metric(label=activity, value="No data")
