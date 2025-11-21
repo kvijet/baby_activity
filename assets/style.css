@@ -1,28 +1,31 @@
 /* Import baby-friendly fonts */
 @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap');
+/* Import Matrix-style monospace fonts */
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Courier+Prime&family=VT323&display=swap');
 
 /* Main background with Matrix-style black gradient */
 .stApp {
     background: linear-gradient(135deg, #000000 0%, #0a0a0a 50%, #001a00 100%) !important;
-    font-family: 'Quicksand', 'Segoe UI', sans-serif !important;
+    font-family: 'Share Tech Mono', 'Courier Prime', 'Courier New', monospace !important;
 }
 
-/* Title styling - clean Matrix green */
+/* Title styling - clean Matrix green with monospace font */
 h1 {
     color: #00ff41 !important;
-    font-family: 'Fredoka', 'Quicksand', sans-serif !important;
+    font-family: 'VT323', 'Share Tech Mono', monospace !important;
     font-weight: 700 !important;
     text-align: center !important;
     padding: 1.5rem 0 !important;
-    font-size: 3rem !important;
-    letter-spacing: 2px !important;
+    font-size: 3.5rem !important;
+    letter-spacing: 3px !important;
 }
 
-/* Subheader styling - bright green */
+/* Subheader styling - bright green with monospace */
 h2, h3 {
     color: #00ff41 !important;
-    font-family: 'Fredoka', 'Quicksand', sans-serif !important;
+    font-family: 'Share Tech Mono', 'Courier Prime', monospace !important;
     font-weight: 600 !important;
+    letter-spacing: 2px !important;
 }
 
 /* Metric cards - dark background with green border */
@@ -38,17 +41,19 @@ h2, h3 {
     font-size: 2.5rem !important;
     color: #00ff41 !important;
     font-weight: 700 !important;
-    font-family: 'Fredoka', sans-serif !important;
+    font-family: 'VT323', 'Share Tech Mono', monospace !important;
+    letter-spacing: 2px !important;
 }
 
 [data-testid="stMetricLabel"] {
     color: #00cc33 !important;
     font-weight: 600 !important;
     font-size: 1.1rem !important;
-    font-family: 'Fredoka', sans-serif !important;
+    font-family: 'Share Tech Mono', monospace !important;
+    letter-spacing: 1px !important;
 }
 
-/* Button styling - clean Matrix green */
+/* Button styling - clean Matrix green with monospace */
 .stButton > button {
     background: linear-gradient(135deg, #003300 0%, #006600 100%) !important;
     color: #00ff41 !important;
@@ -56,14 +61,14 @@ h2, h3 {
     border-radius: 20px !important;
     padding: 0.8rem 1.5rem !important;
     font-weight: 700 !important;
-    font-family: 'Fredoka', sans-serif !important;
+    font-family: 'Share Tech Mono', 'Courier Prime', monospace !important;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5) !important;
     transition: all 0.3s ease !important;
     width: 100% !important;
     margin: 0.3rem 0 !important;
     font-size: 1rem !important;
     text-transform: uppercase !important;
-    letter-spacing: 1px !important;
+    letter-spacing: 2px !important;
 }
 
 .stButton > button:hover {
@@ -89,11 +94,12 @@ h2, h3 {
 .stTextInput > div > div > input {
     border-radius: 15px !important;
     border: 3px solid #00cc33 !important;
-    font-family: 'Quicksand', sans-serif !important;
+    font-family: 'Courier Prime', 'Courier New', monospace !important;
     padding: 0.8rem !important;
     background-color: #0a0a0a !important;
     color: #00ff41 !important;
     font-weight: 600 !important;
+    letter-spacing: 1px !important;
 }
 
 .stTextInput > div > div > input:focus {
@@ -101,33 +107,37 @@ h2, h3 {
     box-shadow: 0 0 0 2px rgba(0, 255, 65, 0.3) !important;
 }
 
-/* Success message styling - bright green */
+/* Success message styling - bright green with monospace */
 .stSuccess {
     background: linear-gradient(135deg, #003300 0%, #004d00 100%) !important;
     color: #00ff41 !important;
     border-radius: 15px !important;
-    font-family: 'Quicksand', sans-serif !important;
+    font-family: 'Share Tech Mono', 'Courier Prime', monospace !important;
     border: 2px solid #00ff41 !important;
     font-weight: 700 !important;
+    letter-spacing: 1px !important;
 }
 
-/* Info message styling - teal green */
+/* Info message styling - teal green with monospace */
 .stInfo {
     background: linear-gradient(135deg, #001a1a 0%, #003333 100%) !important;
     color: #00ffcc !important;
     border-radius: 15px !important;
-    font-family: 'Quicksand', sans-serif !important;
+    font-family: 'Share Tech Mono', 'Courier Prime', monospace !important;
     border: 2px solid #00ffcc !important;
     font-weight: 700 !important;
+    letter-spacing: 1px !important;
 }
 
-/* Error message styling - red with dark background */
+/* Error message styling - red with dark background and monospace */
 .stError {
     background: linear-gradient(135deg, #1a0000 0%, #330000 100%) !important;
     color: #ff3333 !important;
     border-radius: 15px !important;
     border: 2px solid #ff3333 !important;
     font-weight: 700 !important;
+    font-family: 'Share Tech Mono', 'Courier Prime', monospace !important;
+    letter-spacing: 1px !important;
 }
 
 /* Divider styling - clean green line */
@@ -149,20 +159,29 @@ hr {
     border-right: 3px solid #00ff41 !important;
 }
 
-/* Markdown text - bright green for readability */
+/* Markdown text - bright green for readability with monospace */
 .stMarkdown p {
     color: #00ff41 !important;
-    font-family: 'Quicksand', sans-serif !important;
+    font-family: 'Share Tech Mono', 'Courier Prime', monospace !important;
     font-weight: 600 !important;
     line-height: 1.6 !important;
+    letter-spacing: 0.5px !important;
 }
 
-/* Table text - bright green */
+/* Table text - bright green with monospace */
 table {
     color: #00ff41 !important;
+    font-family: 'Courier Prime', 'Courier New', monospace !important;
 }
 
-/* Data editor cells - bright green text */
+/* Data editor cells - bright green text with monospace */
 [data-testid="stDataFrameResizable"] {
     color: #00ff41 !important;
+    font-family: 'Courier Prime', 'Courier New', monospace !important;
+}
+
+/* Caption text styling - monospace */
+.stCaptionContainer {
+    font-family: 'Share Tech Mono', 'Courier Prime', monospace !important;
+    letter-spacing: 1px !important;
 }
