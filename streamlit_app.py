@@ -9,7 +9,8 @@ from utils import (
     initialize_google_sheets,
     process_dataframe,
     load_recent_data,
-    save_changes_to_sheet
+    save_changes_to_sheet,
+    load_css
 )
 
 st.set_page_config(
@@ -19,14 +20,6 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Load custom CSS
-def load_css():
-    css_file = Path(__file__).parent / "assets" / "style.css"
-    if css_file.exists():
-        with open(css_file) as f:
-            st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
-    else:
-        st.warning("Custom CSS file not found. Using default styling.")
 
 load_css()
 
