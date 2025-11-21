@@ -1,30 +1,30 @@
 /* Import baby-friendly fonts */
 @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap');
 
-/* Main background with soft pastel gradient */
+/* Main background with soft blue gradient */
 .stApp {
-    background: linear-gradient(135deg, #fff9fa 0%, #ffe8ec 50%, #ffd9e0 100%) !important;
+    background: linear-gradient(135deg, #f0f7ff 0%, #e3f2fd 50%, #bbdefb 100%) !important;
     font-family: 'Quicksand', 'Segoe UI', sans-serif !important;
 }
 
 /* Title styling - playful and prominent with better contrast */
 h1 {
-    color: #d91e63 !important;
+    color: #1565c0 !important;
     font-family: 'Fredoka', 'Quicksand', sans-serif !important;
     font-weight: 700 !important;
     text-align: center !important;
     padding: 1.5rem 0 !important;
-    text-shadow: 3px 3px 6px rgba(217, 30, 99, 0.2) !important;
+    text-shadow: 3px 3px 6px rgba(21, 101, 192, 0.2) !important;
     font-size: 3rem !important;
     letter-spacing: 2px !important;
 }
 
 /* Subheader styling - darker for better readability */
 h2, h3 {
-    color: #c2185b !important;
+    color: #1976d2 !important;
     font-family: 'Fredoka', 'Quicksand', sans-serif !important;
     font-weight: 600 !important;
-    text-shadow: 2px 2px 4px rgba(194, 24, 91, 0.15) !important;
+    text-shadow: 2px 2px 4px rgba(25, 118, 210, 0.15) !important;
 }
 
 /* Metric cards - white background with colored border */
@@ -32,34 +32,34 @@ h2, h3 {
     background: #ffffff !important;
     padding: 1.2rem !important;
     border-radius: 20px !important;
-    box-shadow: 0 4px 12px rgba(217, 30, 99, 0.2) !important;
-    border: 3px solid #ff80ab !important;
+    box-shadow: 0 4px 12px rgba(21, 101, 192, 0.2) !important;
+    border: 3px solid #64b5f6 !important;
 }
 
 [data-testid="stMetricValue"] {
     font-size: 2.5rem !important;
-    color: #c2185b !important;
+    color: #1976d2 !important;
     font-weight: 700 !important;
     font-family: 'Fredoka', sans-serif !important;
 }
 
 [data-testid="stMetricLabel"] {
-    color: #6a1b3d !important;
+    color: #0d47a1 !important;
     font-weight: 600 !important;
     font-size: 1.1rem !important;
     font-family: 'Fredoka', sans-serif !important;
 }
 
-/* Button styling - vibrant colors with dark text */
+/* Button styling - vibrant blue colors with white text */
 .stButton > button {
-    background: linear-gradient(135deg, #ff4081 0%, #ff80ab 100%) !important;
+    background: linear-gradient(135deg, #42a5f5 0%, #64b5f6 100%) !important;
     color: #ffffff !important;
     border: none !important;
     border-radius: 20px !important;
     padding: 0.8rem 1.5rem !important;
     font-weight: 700 !important;
     font-family: 'Fredoka', sans-serif !important;
-    box-shadow: 0 6px 12px rgba(255, 64, 129, 0.4) !important;
+    box-shadow: 0 6px 12px rgba(66, 165, 245, 0.4) !important;
     transition: all 0.3s ease !important;
     width: 100% !important;
     margin: 0.3rem 0 !important;
@@ -69,8 +69,8 @@ h2, h3 {
 }
 
 .stButton > button:hover {
-    background: linear-gradient(135deg, #f50057 0%, #ff4081 100%) !important;
-    box-shadow: 0 8px 16px rgba(245, 0, 87, 0.5) !important;
+    background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%) !important;
+    box-shadow: 0 8px 16px rgba(25, 118, 210, 0.5) !important;
     transform: translateY(-3px) scale(1.02) !important;
 }
 
@@ -83,14 +83,14 @@ h2, h3 {
     background: #ffffff !important;
     border-radius: 15px !important;
     padding: 1.5rem !important;
-    box-shadow: 0 4px 12px rgba(217, 30, 99, 0.2) !important;
-    border: 3px solid #ff80ab !important;
+    box-shadow: 0 4px 12px rgba(21, 101, 192, 0.2) !important;
+    border: 3px solid #64b5f6 !important;
 }
 
 /* Text input styling - white background with darker text */
 .stTextInput > div > div > input {
     border-radius: 15px !important;
-    border: 3px solid #ff80ab !important;
+    border: 3px solid #64b5f6 !important;
     font-family: 'Quicksand', sans-serif !important;
     padding: 0.8rem !important;
     background-color: #ffffff !important;
@@ -99,8 +99,8 @@ h2, h3 {
 }
 
 .stTextInput > div > div > input:focus {
-    border-color: #f50057 !important;
-    box-shadow: 0 0 0 3px rgba(245, 0, 87, 0.2) !important;
+    border-color: #1976d2 !important;
+    box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.2) !important;
 }
 
 /* Success message styling - darker text */
@@ -136,7 +136,7 @@ h2, h3 {
 hr {
     border: none !important;
     height: 3px !important;
-    background: linear-gradient(90deg, transparent 0%, #ff4081 50%, transparent 100%) !important;
+    background: linear-gradient(90deg, transparent 0%, #42a5f5 50%, transparent 100%) !important;
     margin: 2rem 0 !important;
 }
 
@@ -147,8 +147,8 @@ hr {
 
 /* Sidebar styling (if used in future) */
 [data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #fff9fa 0%, #ffe8ec 100%) !important;
-    border-right: 3px solid #ff80ab !important;
+    background: linear-gradient(180deg, #f0f7ff 0%, #e3f2fd 100%) !important;
+    border-right: 3px solid #64b5f6 !important;
 }
 
 /* Markdown text - darker for readability */
