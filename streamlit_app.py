@@ -150,6 +150,17 @@ with container1:
                         unsafe_allow_html=True
                     )
                     col_accept, col_decline = st.columns(2)
+                    button_style = """
+                        <style>
+                        div[data-testid="column"] button {
+                            width: 100%;
+                            min-width: 120px;
+                            height: 40px;
+                            font-size: 16px;
+                        }
+                        </style>
+                    """
+                    st.markdown(button_style, unsafe_allow_html=True)
                     with col_accept:
                         accept_btn = st.button(
                             "✅ Accept and Add",
