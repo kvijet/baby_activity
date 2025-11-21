@@ -125,7 +125,7 @@ if df_all is not None and len(df_all) > 0:
                 st.metric(
                     label=f"{last_activity}", 
                     value=f"{hours}h {minutes}m",
-                    delta=last_time.strftime('%d-%b %I:%M %p')
+                    help=f"Last at: {last_time.strftime('%d-%b %I:%M %p')}"
                 )
             else:
                 st.metric(label="Sleep/Wake", value="No data")
@@ -146,7 +146,7 @@ if df_all is not None and len(df_all) > 0:
                     st.metric(
                         label=activity, 
                         value=f"{hours}h {minutes}m",
-                        delta=last_time.strftime('%d-%b %I:%M %p')
+                        help=f"Last at: {last_time.strftime('%d-%b %I:%M %p')}"
                     )
             else:
                 with cols[i]:
