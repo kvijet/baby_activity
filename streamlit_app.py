@@ -121,7 +121,15 @@ with container1:
         if st.button(action, key=f"add_{action}"):
             date, time_str = get_ist_datetime()
             # Find most recent activity
-            if df_all is not None and len(df_all) > 0:
+            # Always load latest data from Google Sheet to avoid stale session state
+            try:
+                latest_data = load_sheet_data(sheet)
+                latest_df = process_dataframe(latest_data, ist)
+            except Exception as e:
+                st.error(f"Failed to reload data: {str(e)}")
+                latest_df = None
+
+            if latest_df is not None and len(latest_df) > 0:
                 last_row = df_all.iloc[-1]
                 last_action = last_row['Action']
                 last_time = last_row['datetime']
