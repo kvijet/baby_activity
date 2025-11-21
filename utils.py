@@ -4,9 +4,10 @@ from datetime import datetime
 import pytz
 import pandas as pd
 import streamlit as st
+from pathlib import Path
 
 
-def load_css():
+def load_css(app_dir=None):
     """
     Loads a custom CSS file from the 'assets/style.css' path relative to the current file
     and injects its contents into a Streamlit app using st.markdown. If the CSS file is not found,
@@ -14,12 +15,17 @@ def load_css():
 
     This function enhances the visual appearance of the Streamlit app by applying custom styles.
     """
-    css_file = Path(__file__).parent / "assets" / "style.css"
+    if app_dir is None:
+        app_dir = Path.cwd()
+    else:
+        app_dir = Path(app_dir)
+    
+    css_file = app_dir / "assets" / "style.css"
     if css_file.exists():
         with open(css_file) as f:
             st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
     else:
-        st.warning("Custom CSS file not found. Using default styling.")
+        st.warning(f"Custom CSS file not found at {css_file}. Using default styling.")
 
 def get_ist_datetime():
     """Get current date and time in IST timezone"""

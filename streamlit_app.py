@@ -21,7 +21,7 @@ st.set_page_config(
 )
 
 # Load custom CSS
-load_css()
+load_css(Path(__file__).parent)
 
 st.title("👶 Suddu Tracker 👶")
 
