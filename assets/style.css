@@ -31,7 +31,7 @@ h2, h3 {
     padding: 1.2rem !important;
     border-radius: 20px !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
-    border: none !important;
+    border: 3px solid #00ff41 !important;
 }
 
 [data-testid="stMetricValue"] {
