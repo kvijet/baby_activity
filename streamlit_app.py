@@ -119,13 +119,9 @@ with container1:
     for action in actions:
         if st.button(action):
             date, time = get_ist_datetime()
-            notes_key = f"notes_{action.replace(' ', '_')}"
-            notes = st.text_input(f"Notes for {action}", key=notes_key)
-            if 'submitted_action' not in st.session_state or st.session_state['submitted_action'] != action:
-                new_row = [date, time, action, notes]
-                sheet.append_row(new_row)
-                st.session_state['submitted_action'] = action
-                st.success(f"Recorded: {action} at {date} {time}")
+            new_row = [date, time, action, ""]
+            sheet.append_row(new_row)
+            st.success(f"Recorded: {action} at {date} {time}")
 
 with container2:
     st.header("Recent Activity")
