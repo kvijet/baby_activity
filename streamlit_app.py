@@ -135,16 +135,39 @@ with container1:
                 last_time = last_row['datetime']
                 if last_action == action:
                     # Duplicate detected, show warning and options
-                    st.warning(f"'{action}' was already added at {last_time.strftime('%d-%b %I:%M %p')}.")
+                    # Custom color scheme for action-required section
+                    st.markdown(
+                        """
+                        <div style="background-color:#fff3cd; border:2px solid #ff9800; border-radius:8px; padding:16px; margin-bottom:10px;">
+                        <span style="color:#b26a00; font-weight:bold; font-size:16px;">
+                        ⚠️ '{action}' was already added at {last_time}.
+                        </span>
+                        </div>
+                        """.format(
+                            action=action,
+                            last_time=last_time.strftime('%d-%b %I:%M %p')
+                        ),
+                        unsafe_allow_html=True
+                    )
                     col_accept, col_decline = st.columns(2)
                     with col_accept:
-                        if st.button("Accept and Add", key=f"accept_{action}"):
+                        accept_btn = st.button(
+                            "✅ Accept and Add",
+                            key=f"accept_{action}",
+                            help="Add anyway",
+                        )
+                        if accept_btn:
                             new_row = [date, time_str, action, ""]
                             sheet.append_row(new_row)
                             st.success(f"Recorded: {action} at {date} {time_str}")
                             st.rerun()
                     with col_decline:
-                        if st.button("Decline", key=f"decline_{action}"):
+                        decline_btn = st.button(
+                            "❌ Decline",
+                            key=f"decline_{action}",
+                            help="Do not add"
+                        )
+                        if decline_btn:
                             st.info("Activity not logged.")
                 else:
                     new_row = [date, time_str, action, ""]
