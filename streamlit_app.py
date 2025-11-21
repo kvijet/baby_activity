@@ -116,13 +116,37 @@ container1, container2 = st.columns([1, 2])
 
 with container1:
     st.header("Add Activity")
-    actions = ['Slept', 'Woke Up','Water', 'Fed', 'Solid Food', 'Potty', 'Diaper Change']
+    actions = ['Slept', 'Woke Up', 'Water', 'Fed', 'Solid Food', 'Potty', 'Diaper Change']
     for action in actions:
-        if st.button(action):
-            date, time = get_ist_datetime()
-            new_row = [date, time, action, ""]
-            sheet.append_row(new_row)
-            st.success(f"Recorded: {action} at {date} {time}")
+        if st.button(action, key=f"add_{action}"):
+            date, time_str = get_ist_datetime()
+            # Find most recent activity
+            if df_all is not None and len(df_all) > 0:
+                last_row = df_all.iloc[-1]
+                last_action = last_row['Action']
+                last_time = last_row['datetime']
+                if last_action == action:
+                    # Duplicate detected, show modal
+                    with st.modal(f"Duplicate entry detected"):
+                        st.warning(f"'{action}' was already added at {last_time.strftime('%d-%b %I:%M %p')}.")
+                        col_accept, col_decline = st.columns(2)
+                        with col_accept:
+                            if st.button("Accept and Add", key=f"accept_{action}"):
+                                new_row = [date, time_str, action, ""]
+                                sheet.append_row(new_row)
+                                st.success(f"Recorded: {action} at {date} {time_str}")
+                                st.rerun()
+                        with col_decline:
+                            if st.button("Decline", key=f"decline_{action}"):
+                                st.info("Activity not logged.")
+                else:
+                    new_row = [date, time_str, action, ""]
+                    sheet.append_row(new_row)
+                    st.success(f"Recorded: {action} at {date} {time_str}")
+            else:
+                new_row = [date, time_str, action, ""]
+                sheet.append_row(new_row)
+                st.success(f"Recorded: {action} at {date} {time_str}")
 
 with container2:
     st.header("Recent Activity")
