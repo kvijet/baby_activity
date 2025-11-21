@@ -150,16 +150,19 @@ with container1:
                         unsafe_allow_html=True
                     )
                     col_accept, col_decline = st.columns(2)
+                    # Apply button style to both columns
                     button_style = """
                         <style>
                         div[data-testid="column"] button {
-                            width: 100%;
-                            min-width: 120px;
-                            height: 80px;
-                            font-size: 16px;
+                            width: 100% !important;
+                            min-width: 120px !important;
+                            height: 40px !important;
+                            font-size: 16px !important;
+                            white-space: nowrap;
                         }
                         </style>
                     """
+                    st.markdown(button_style, unsafe_allow_html=True)
                     st.markdown(button_style, unsafe_allow_html=True)
                     with col_accept:
                         accept_btn = st.button(
