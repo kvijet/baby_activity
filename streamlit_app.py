@@ -120,7 +120,6 @@ with container1:
     for action in actions:
         if st.button(action, key=f"add_{action}"):
             date, time_str = get_ist_datetime()
-            # Find most recent activity
             # Always load latest data from Google Sheet to avoid stale session state
             try:
                 latest_data = load_sheet_data(sheet)
@@ -129,52 +128,178 @@ with container1:
                 st.error(f"Failed to reload data: {str(e)}")
                 latest_df = None
 
+            def prompt_missing_activity(missing_action, last_time):
+                st.markdown(
+                    f"""
+                    <div style="background-color:#fff3cd; border:2px solid #ff9800; border-radius:8px; padding:16px; margin-bottom:10px;">
+                    <span style="color:#b26a00; font-weight:bold; font-size:16px;">
+                    ⚠️ No '{missing_action}' activity found after {last_time.strftime('%d-%b %I:%M %p') if last_time else 'previous session'}.<br>
+                    Please add a '{missing_action}' for the previous session before adding '{action}'.
+                    </span>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+                col_add_missing, col_continue = st.columns(2)
+                with col_add_missing:
+                    add_missing_btn = st.button(
+                        f"➕ Add '{missing_action}' for previous session",
+                        key=f"add_missing_{missing_action}_{action}",
+                        help=f"Add '{missing_action}' before '{action}'"
+                    )
+                    if add_missing_btn:
+                        prev_date, prev_time_str = get_ist_datetime()
+                        new_row = [prev_date, prev_time_str, missing_action, ""]
+                        sheet.append_row(new_row)
+                        st.success(f"Recorded: {missing_action} at {prev_date} {prev_time_str}")
+                        st.rerun()
+                with col_continue:
+                    continue_btn = st.button(
+                        f"✅ Continue with '{action}'",
+                        key=f"continue_{action}",
+                        help=f"Add '{action}' anyway"
+                    )
+                    if continue_btn:
+                        new_row = [date, time_str, action, ""]
+                        sheet.append_row(new_row)
+                        st.success(f"Recorded: {action} at {date} {time_str}")
+                        st.rerun()
+
             if latest_df is not None and len(latest_df) > 0:
-                last_row = df_all.iloc[-1]
+                last_row = latest_df.iloc[-1]
                 last_action = last_row['Action']
                 last_time = last_row['datetime']
-                if last_action == action:
-                    # Duplicate detected, show warning and options
-                    # Custom color scheme for action-required section
-                    st.markdown(
-                        """
-                        <div style="background-color:#fff3cd; border:2px solid #ff9800; border-radius:8px; padding:16px; margin-bottom:10px;">
-                        <span style="color:#b26a00; font-weight:bold; font-size:16px;">
-                        ⚠️ '{action}' was already added at {last_time}.
-                        </span>
-                        </div>
-                        """.format(
-                            action=action,
-                            last_time=last_time.strftime('%d-%b %I:%M %p')
-                        ),
-                        unsafe_allow_html=True
-                    )
-                    col_accept, col_decline = st.columns(2)
-                    # Apply button style to both columns
 
-                    with col_accept:
-                        accept_btn = st.button(
-                            "✅ Accept and Add",
-                            key=f"accept_{action}",
-                            help="Add anyway",
-                        )
-                        if accept_btn:
+                # Sleep/Wake consistency check
+                if action == "Slept":
+                    # Check if last "Woke Up" exists after last "Slept"
+                    last_woke = latest_df[latest_df['Action'] == 'Woke Up']['datetime'].max() if not latest_df[latest_df['Action'] == 'Woke Up'].empty else None
+                    last_slept = latest_df[latest_df['Action'] == 'Slept']['datetime'].max() if not latest_df[latest_df['Action'] == 'Slept'].empty else None
+                    if last_slept is None or (last_woke and last_woke > last_slept):
+                        # OK to add "Slept"
+                        if last_action == action:
+                            # Duplicate check
+                            st.markdown(
+                                f"""
+                                <div style="background-color:#fff3cd; border:2px solid #ff9800; border-radius:8px; padding:16px; margin-bottom:10px;">
+                                <span style="color:#b26a00; font-weight:bold; font-size:16px;">
+                                ⚠️ '{action}' was already added at {last_time.strftime('%d-%b %I:%M %p')}.
+                                </span>
+                                </div>
+                                """,
+                                unsafe_allow_html=True
+                            )
+                            col_accept, col_decline = st.columns(2)
+                            with col_accept:
+                                accept_btn = st.button(
+                                    "✅ Accept and Add",
+                                    key=f"accept_{action}",
+                                    help="Add anyway",
+                                )
+                                if accept_btn:
+                                    new_row = [date, time_str, action, ""]
+                                    sheet.append_row(new_row)
+                                    st.success(f"Recorded: {action} at {date} {time_str}")
+                                    st.rerun()
+                            with col_decline:
+                                decline_btn = st.button(
+                                    "❌ Decline",
+                                    key=f"decline_{action}",
+                                    help="Do not add"
+                                )
+                                if decline_btn:
+                                    st.info("Activity not logged.")
+                        else:
                             new_row = [date, time_str, action, ""]
                             sheet.append_row(new_row)
                             st.success(f"Recorded: {action} at {date} {time_str}")
-                            st.rerun()
-                    with col_decline:
-                        decline_btn = st.button(
-                            "❌ Decline",
-                            key=f"decline_{action}",
-                            help="Do not add"
-                        )
-                        if decline_btn:
-                            st.info("Activity not logged.")
+                    else:
+                        # No "Woke Up" after last "Slept", prompt user
+                        prompt_missing_activity("Woke Up", last_slept)
+
+                elif action == "Woke Up":
+                    # Check if last "Slept" exists after last "Woke Up"
+                    last_woke = latest_df[latest_df['Action'] == 'Woke Up']['datetime'].max() if not latest_df[latest_df['Action'] == 'Woke Up'].empty else None
+                    last_slept = latest_df[latest_df['Action'] == 'Slept']['datetime'].max() if not latest_df[latest_df['Action'] == 'Slept'].empty else None
+                    if last_woke is None or (last_slept and last_slept > last_woke):
+                        # OK to add "Woke Up"
+                        if last_action == action:
+                            # Duplicate check
+                            st.markdown(
+                                f"""
+                                <div style="background-color:#fff3cd; border:2px solid #ff9800; border-radius:8px; padding:16px; margin-bottom:10px;">
+                                <span style="color:#b26a00; font-weight:bold; font-size:16px;">
+                                ⚠️ '{action}' was already added at {last_time.strftime('%d-%b %I:%M %p')}.
+                                </span>
+                                </div>
+                                """,
+                                unsafe_allow_html=True
+                            )
+                            col_accept, col_decline = st.columns(2)
+                            with col_accept:
+                                accept_btn = st.button(
+                                    "✅ Accept and Add",
+                                    key=f"accept_{action}",
+                                    help="Add anyway",
+                                )
+                                if accept_btn:
+                                    new_row = [date, time_str, action, ""]
+                                    sheet.append_row(new_row)
+                                    st.success(f"Recorded: {action} at {date} {time_str}")
+                                    st.rerun()
+                            with col_decline:
+                                decline_btn = st.button(
+                                    "❌ Decline",
+                                    key=f"decline_{action}",
+                                    help="Do not add"
+                                )
+                                if decline_btn:
+                                    st.info("Activity not logged.")
+                        else:
+                            new_row = [date, time_str, action, ""]
+                            sheet.append_row(new_row)
+                            st.success(f"Recorded: {action} at {date} {time_str}")
+                    else:
+                        # No "Slept" after last "Woke Up", prompt user
+                        prompt_missing_activity("Slept", last_woke)
+
                 else:
-                    new_row = [date, time_str, action, ""]
-                    sheet.append_row(new_row)
-                    st.success(f"Recorded: {action} at {date} {time_str}")
+                    # Other actions: duplicate check only
+                    if last_action == action:
+                        st.markdown(
+                            f"""
+                            <div style="background-color:#fff3cd; border:2px solid #ff9800; border-radius:8px; padding:16px; margin-bottom:10px;">
+                            <span style="color:#b26a00; font-weight:bold; font-size:16px;">
+                            ⚠️ '{action}' was already added at {last_time.strftime('%d-%b %I:%M %p')}.
+                            </span>
+                            </div>
+                            """,
+                            unsafe_allow_html=True
+                        )
+                        col_accept, col_decline = st.columns(2)
+                        with col_accept:
+                            accept_btn = st.button(
+                                "✅ Accept and Add",
+                                key=f"accept_{action}",
+                                help="Add anyway",
+                            )
+                            if accept_btn:
+                                new_row = [date, time_str, action, ""]
+                                sheet.append_row(new_row)
+                                st.success(f"Recorded: {action} at {date} {time_str}")
+                                st.rerun()
+                        with col_decline:
+                            decline_btn = st.button(
+                                "❌ Decline",
+                                key=f"decline_{action}",
+                                help="Do not add"
+                            )
+                            if decline_btn:
+                                st.info("Activity not logged.")
+                    else:
+                        new_row = [date, time_str, action, ""]
+                        sheet.append_row(new_row)
+                        st.success(f"Recorded: {action} at {date} {time_str}")
             else:
                 new_row = [date, time_str, action, ""]
                 sheet.append_row(new_row)
