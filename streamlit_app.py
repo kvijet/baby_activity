@@ -126,19 +126,18 @@ with container1:
                 last_action = last_row['Action']
                 last_time = last_row['datetime']
                 if last_action == action:
-                    # Duplicate detected, show modal
-                    with st.modal(f"Duplicate entry detected"):
-                        st.warning(f"'{action}' was already added at {last_time.strftime('%d-%b %I:%M %p')}.")
-                        col_accept, col_decline = st.columns(2)
-                        with col_accept:
-                            if st.button("Accept and Add", key=f"accept_{action}"):
-                                new_row = [date, time_str, action, ""]
-                                sheet.append_row(new_row)
-                                st.success(f"Recorded: {action} at {date} {time_str}")
-                                st.rerun()
-                        with col_decline:
-                            if st.button("Decline", key=f"decline_{action}"):
-                                st.info("Activity not logged.")
+                    # Duplicate detected, show warning and options
+                    st.warning(f"'{action}' was already added at {last_time.strftime('%d-%b %I:%M %p')}.")
+                    col_accept, col_decline = st.columns(2)
+                    with col_accept:
+                        if st.button("Accept and Add", key=f"accept_{action}"):
+                            new_row = [date, time_str, action, ""]
+                            sheet.append_row(new_row)
+                            st.success(f"Recorded: {action} at {date} {time_str}")
+                            st.rerun()
+                    with col_decline:
+                        if st.button("Decline", key=f"decline_{action}"):
+                            st.info("Activity not logged.")
                 else:
                     new_row = [date, time_str, action, ""]
                     sheet.append_row(new_row)
