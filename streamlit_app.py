@@ -45,15 +45,6 @@ df_all = process_dataframe(data, ist)
 # Display time elapsed since key activities
 st.subheader("⏱️ Time Since Last Activity")
 
-# Auto-refresh setup
-refresh_interval = 60
-if "last_refresh" not in st.session_state:
-    st.session_state["last_refresh"] = time.time()
-
-if time.time() - st.session_state["last_refresh"] > refresh_interval:
-    st.session_state["last_refresh"] = time.time()
-    st.experimental_rerun()
-
 if df_all is not None and len(df_all) > 0:
     tracked_activities = ['Fed', 'Solid Food', 'Diaper Change']
     cols = st.columns(len(tracked_activities) + 1)
