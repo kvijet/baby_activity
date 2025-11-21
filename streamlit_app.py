@@ -20,7 +20,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-
+# Load custom CSS
 load_css()
 
 st.title("👶 Suddu Tracker 👶")
