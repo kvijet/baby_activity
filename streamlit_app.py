@@ -155,7 +155,7 @@ with container1:
                         div[data-testid="column"] button {
                             width: 100%;
                             min-width: 120px;
-                            height: 40px;
+                            height: 80px;
                             font-size: 16px;
                         }
                         </style>
