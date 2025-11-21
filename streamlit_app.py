@@ -9,7 +9,8 @@ from pathlib import Path
 st.set_page_config(
     page_title="Suddu Tracker 👶",
     page_icon="👶",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
 
 # Load custom CSS

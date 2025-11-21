@@ -7,14 +7,13 @@
     font-family: 'Quicksand', 'Segoe UI', sans-serif !important;
 }
 
-/* Title styling - Matrix green with glow effect */
+/* Title styling - clean Matrix green */
 h1 {
     color: #00ff41 !important;
     font-family: 'Fredoka', 'Quicksand', sans-serif !important;
     font-weight: 700 !important;
     text-align: center !important;
     padding: 1.5rem 0 !important;
-    text-shadow: 0 0 10px #00ff41, 0 0 20px #00ff41, 0 0 30px #00ff41 !important;
     font-size: 3rem !important;
     letter-spacing: 2px !important;
 }
@@ -24,15 +23,14 @@ h2, h3 {
     color: #00ff41 !important;
     font-family: 'Fredoka', 'Quicksand', sans-serif !important;
     font-weight: 600 !important;
-    text-shadow: 0 0 8px #00ff41, 0 0 15px #00ff41 !important;
 }
 
-/* Metric cards - dark background with green border and glow */
+/* Metric cards - dark background with green border */
 [data-testid="stMetric"] {
     background: #0a0a0a !important;
     padding: 1.2rem !important;
     border-radius: 20px !important;
-    box-shadow: 0 0 20px rgba(0, 255, 65, 0.3), 0 4px 12px rgba(0, 255, 65, 0.2) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
     border: 3px solid #00ff41 !important;
 }
 
@@ -41,7 +39,6 @@ h2, h3 {
     color: #00ff41 !important;
     font-weight: 700 !important;
     font-family: 'Fredoka', sans-serif !important;
-    text-shadow: 0 0 8px #00ff41 !important;
 }
 
 [data-testid="stMetricLabel"] {
@@ -51,7 +48,7 @@ h2, h3 {
     font-family: 'Fredoka', sans-serif !important;
 }
 
-/* Button styling - Matrix green with glow effect */
+/* Button styling - clean Matrix green */
 .stButton > button {
     background: linear-gradient(135deg, #003300 0%, #006600 100%) !important;
     color: #00ff41 !important;
@@ -60,7 +57,7 @@ h2, h3 {
     padding: 0.8rem 1.5rem !important;
     font-weight: 700 !important;
     font-family: 'Fredoka', sans-serif !important;
-    box-shadow: 0 0 15px rgba(0, 255, 65, 0.4), 0 6px 12px rgba(0, 255, 65, 0.3) !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5) !important;
     transition: all 0.3s ease !important;
     width: 100% !important;
     margin: 0.3rem 0 !important;
@@ -71,21 +68,20 @@ h2, h3 {
 
 .stButton > button:hover {
     background: linear-gradient(135deg, #006600 0%, #009900 100%) !important;
-    box-shadow: 0 0 25px rgba(0, 255, 65, 0.6), 0 8px 16px rgba(0, 255, 65, 0.5) !important;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6) !important;
     transform: translateY(-3px) scale(1.02) !important;
-    text-shadow: 0 0 10px #00ff41 !important;
 }
 
 .stButton > button:active {
     transform: translateY(0) scale(0.98) !important;
 }
 
-/* Data editor styling - dark background with green glow */
+/* Data editor styling - dark background with green border */
 .stDataFrame {
     background: #0a0a0a !important;
     border-radius: 15px !important;
     padding: 1.5rem !important;
-    box-shadow: 0 0 20px rgba(0, 255, 65, 0.3), 0 4px 12px rgba(0, 255, 65, 0.2) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
     border: 3px solid #00ff41 !important;
 }
 
@@ -102,7 +98,7 @@ h2, h3 {
 
 .stTextInput > div > div > input:focus {
     border-color: #00ff41 !important;
-    box-shadow: 0 0 15px rgba(0, 255, 65, 0.5) !important;
+    box-shadow: 0 0 0 2px rgba(0, 255, 65, 0.3) !important;
 }
 
 /* Success message styling - bright green */
@@ -113,7 +109,6 @@ h2, h3 {
     font-family: 'Quicksand', sans-serif !important;
     border: 2px solid #00ff41 !important;
     font-weight: 700 !important;
-    box-shadow: 0 0 15px rgba(0, 255, 65, 0.3) !important;
 }
 
 /* Info message styling - teal green */
@@ -124,7 +119,6 @@ h2, h3 {
     font-family: 'Quicksand', sans-serif !important;
     border: 2px solid #00ffcc !important;
     font-weight: 700 !important;
-    box-shadow: 0 0 15px rgba(0, 255, 204, 0.3) !important;
 }
 
 /* Error message styling - red with dark background */
@@ -134,16 +128,14 @@ h2, h3 {
     border-radius: 15px !important;
     border: 2px solid #ff3333 !important;
     font-weight: 700 !important;
-    box-shadow: 0 0 15px rgba(255, 51, 51, 0.3) !important;
 }
 
-/* Divider styling - glowing green line */
+/* Divider styling - clean green line */
 hr {
     border: none !important;
     height: 2px !important;
     background: linear-gradient(90deg, transparent 0%, #00ff41 50%, transparent 100%) !important;
     margin: 2rem 0 !important;
-    box-shadow: 0 0 10px rgba(0, 255, 65, 0.5) !important;
 }
 
 /* Column containers */
@@ -155,7 +147,6 @@ hr {
 [data-testid="stSidebar"] {
     background: linear-gradient(180deg, #000000 0%, #001a00 100%) !important;
     border-right: 3px solid #00ff41 !important;
-    box-shadow: 0 0 20px rgba(0, 255, 65, 0.2) !important;
 }
 
 /* Markdown text - bright green for readability */
