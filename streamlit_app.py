@@ -150,20 +150,7 @@ with container1:
                         unsafe_allow_html=True
                     )
                     col_accept, col_decline = st.columns(2)
-                    # Apply button style to both columns
-                    button_style = """
-                        <style>
-                        div[data-testid="column"] button {
-                            width: 100% !important;
-                            min-width: 120px !important;
-                            height: 40px !important;
-                            font-size: 16px !important;
-                            white-space: nowrap;
-                        }
-                        </style>
-                    """
-                    st.markdown(button_style, unsafe_allow_html=True)
-                    st.markdown(button_style, unsafe_allow_html=True)
+
                     with col_accept:
                         accept_btn = st.button(
                             "✅ Accept and Add",
@@ -171,10 +158,14 @@ with container1:
                             help="Add anyway",
                         )
                         if accept_btn:
-                            new_row = [date, time_str, action, ""]
-                            sheet.append_row(new_row)
-                            st.success(f"Recorded: {action} at {date} {time_str}")
+                            st.session_state[f"accepted_{action}"] = True
                             st.rerun()
+                    # After rerun, check session state and add row
+                    if st.session_state.get(f"accepted_{action}", False):
+                        new_row = [date, time_str, action, ""]
+                        sheet.append_row(new_row)
+                        st.success(f"Recorded: {action} at {date} {time_str}")
+                        st.session_state[f"accepted_{action}"] = False
                     with col_decline:
                         decline_btn = st.button(
                             "❌ Decline",
