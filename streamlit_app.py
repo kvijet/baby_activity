@@ -158,14 +158,9 @@ with container1:
                             help="Add anyway",
                         )
                         if accept_btn:
-                            st.session_state[f"accepted_{action}"] = True
-                            st.rerun()
-                    # After rerun, check session state and add row
-                    if st.session_state.get(f"accepted_{action}", False):
-                        new_row = [date, time_str, action, ""]
-                        sheet.append_row(new_row)
-                        st.success(f"Recorded: {action} at {date} {time_str}")
-                        st.session_state[f"accepted_{action}"] = False
+                            new_row = [date, time_str, action, ""]
+                            sheet.append_row(new_row)
+                            st.success(f"Recorded: {action} at {date} {time_str}")
                     with col_decline:
                         decline_btn = st.button(
                             "❌ Decline",
