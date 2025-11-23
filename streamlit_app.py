@@ -160,7 +160,7 @@ with container2:
             changes_saved = save_changes_to_sheet(sheet, df, df_recent, edited_df, two_days_ago, ist)
             if changes_saved:
                 st.success("Changes saved to Google Sheet!")
-                st.session_state["refresh_button"] = True
+                st.rerun()
             else:
                 st.info("No changes to save.")
     else:
