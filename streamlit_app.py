@@ -11,7 +11,8 @@ from utils import (
     load_recent_data,
     save_changes_to_sheet,
     load_css,
-    calculate_daily_summaries
+    calculate_daily_summaries,
+    get_most_recent_activity
 )
 
 st.set_page_config(
@@ -117,7 +118,13 @@ container1, container2 = st.columns([1, 2])
 with container1:
     st.header("Add Activity")
     actions = ['Slept', 'Woke Up', 'Water', 'Fed', 'Solid Food', 'Potty', 'Diaper Change']
+
+    # Get most recent activity and time
+    recent_activity, recent_time = get_most_recent_activity(df_all)
+
     for action in actions:
+        if recent_activity == action and recent_time is not None:
+            st.caption(f"Last '{action}' recorded at {recent_time.strftime('%d-%b %I:%M %p')}")
         if st.button(action, key=f"add_{action}"):
             date, time_str = get_ist_datetime()
             new_row = [date, time_str, action, ""]

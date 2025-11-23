@@ -215,3 +215,13 @@ def calculate_daily_summaries(df_all, ist, days=3):
         })
     
     return summaries
+
+def get_most_recent_activity(df):
+    """
+    Returns the most recent activity and its timestamp from the dataframe.
+    If no activity is found, returns (None, None).
+    """
+    if df is not None and len(df) > 0:
+        last_row = df.sort_values("datetime", ascending=False).iloc[0]
+        return last_row["Action"], last_row["datetime"]
+    return None, None
