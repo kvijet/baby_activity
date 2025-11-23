@@ -165,55 +165,85 @@ def save_changes_to_sheet(sheet, df, df_recent, edited_df, two_days_ago, ist):
     else:
         return False  # No changes
 
-def calculate_daily_summaries(df_all, ist, days=3):
-    """Calculate daily summaries for the last N days"""
-    if df_all is None or len(df_all) == 0:
-        return None
-    
-    from datetime import datetime, timedelta
-    
-    now_ist = datetime.now(ist)
+def calculate_daily_summaries(df, tz, days=3):
+    """
+    Returns a list of daily summaries for the last `days` days.
+    Sleep intervals spanning midnight are split between days.
+    """
+    import pandas as pd
+    from datetime import timedelta
+
+    if df is None or len(df) == 0:
+        return []
+
+    # Ensure datetime is sorted
+    df = df.sort_values("datetime")
+
+    # Get the last N days (including today)
+    today = pd.Timestamp.now(tz).normalize()
+    date_range = [today - timedelta(days=i) for i in range(days)]
+    date_range = sorted(date_range)
+
     summaries = []
-    
-    for i in range(days):
-        day_date = (now_ist - timedelta(days=i)).date()
-        day_df = df_all[df_all['datetime'].dt.date == day_date]
-        
-        # Count activities
-        fed_count = len(day_df[day_df['Action'] == 'Fed'])
-        solid_food_count = len(day_df[day_df['Action'] == 'Solid Food'])
-        diaper_count = len(day_df[day_df['Action'] == 'Diaper Change'])
-        
-        # Calculate total sleep duration
-        sleep_df = day_df[day_df['Action'].isin(['Slept', 'Woke Up'])].sort_values('datetime')
-        total_sleep_minutes = 0
-        
-        if len(sleep_df) > 0:
-            current_sleep_start = None
-            for _, row in sleep_df.iterrows():
-                if row['Action'] == 'Slept':
-                    current_sleep_start = row['datetime']
-                elif row['Action'] == 'Woke Up' and current_sleep_start:
-                    sleep_duration = (row['datetime'] - current_sleep_start).total_seconds() / 60
-                    total_sleep_minutes += sleep_duration
-                    current_sleep_start = None
-            
-            # If still sleeping (no wake up after last sleep)
-            if current_sleep_start and i == 0:
-                sleep_duration = (now_ist - current_sleep_start).total_seconds() / 60
-                total_sleep_minutes += sleep_duration
-        
-        sleep_hours = int(total_sleep_minutes // 60)
-        sleep_mins = int(total_sleep_minutes % 60)
-        
+
+    for day in date_range[::-1]:  # reverse for most recent first
+        day_start = day
+        day_end = day + timedelta(days=1)
+
+        # Filter actions for the day
+        day_df = df[(df["datetime"] >= day_start) & (df["datetime"] < day_end)]
+
+        fed_count = (day_df["Action"] == "Fed").sum()
+        solid_count = (day_df["Action"] == "Solid Food").sum()
+        diaper_count = (day_df["Action"] == "Diaper Change").sum()
+
+        # Sleep calculation
+        slept_events = df[df["Action"] == "Slept"]
+        woke_events = df[df["Action"] == "Woke Up"]
+
+        sleep_total = timedelta(0)
+
+        # Pair slept/woke events
+        slept_times = slept_events["datetime"].tolist()
+        woke_times = woke_events["datetime"].tolist()
+
+        pairs = []
+        i, j = 0, 0
+        while i < len(slept_times):
+            slept_time = slept_times[i]
+            # Find the next woke_time after slept_time
+            while j < len(woke_times) and woke_times[j] <= slept_time:
+                j += 1
+            if j < len(woke_times):
+                woke_time = woke_times[j]
+                pairs.append((slept_time, woke_time))
+                i += 1
+                j += 1
+            else:
+                # No matching woke_time, assume still sleeping
+                i += 1
+
+        # For each pair, split sleep across days
+        for slept_time, woke_time in pairs:
+            # If sleep interval overlaps with this day
+            interval_start = max(slept_time, day_start)
+            interval_end = min(woke_time, day_end)
+            if interval_start < interval_end:
+                sleep_total += (interval_end - interval_start)
+
+        # Format sleep as hours/minutes
+        sleep_hours = int(sleep_total.total_seconds() // 3600)
+        sleep_minutes = int((sleep_total.total_seconds() % 3600) // 60)
+        sleep_str = f"{sleep_hours}h {sleep_minutes}m"
+
         summaries.append({
-            'Date': day_date.strftime('%d-%b-%Y'),
-            'Fed': fed_count,
-            'Solid Food': solid_food_count,
-            'Diaper': diaper_count,
-            'Sleep': f"{sleep_hours}h {sleep_mins}m"
+            "Date": day.strftime("%d-%b"),
+            "Fed": fed_count,
+            "Solid Food": solid_count,
+            "Diaper": diaper_count,
+            "Sleep": sleep_str
         })
-    
+
     return summaries
 
 def get_most_recent_activity(df):
