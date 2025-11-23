@@ -120,63 +120,9 @@ with container1:
     for action in actions:
         if st.button(action, key=f"add_{action}"):
             date, time_str = get_ist_datetime()
-            # Find most recent activity
-            # Always load latest data from Google Sheet to avoid stale session state
-            try:
-                latest_data = load_sheet_data(sheet)
-                latest_df = process_dataframe(latest_data, ist)
-            except Exception as e:
-                st.error(f"Failed to reload data: {str(e)}")
-                latest_df = None
-
-            if latest_df is not None and len(latest_df) > 0:
-                last_row = df_all.iloc[-1]
-                last_action = last_row['Action']
-                last_time = last_row['datetime']
-                if last_action == action:
-                    # Duplicate detected, show warning and options
-                    # Custom color scheme for action-required section
-                    st.markdown(
-                        """
-                        <div style="background-color:#fff3cd; border:2px solid #ff9800; border-radius:8px; padding:16px; margin-bottom:10px;">
-                        <span style="color:#b26a00; font-weight:bold; font-size:16px;">
-                        ⚠️ '{action}' was already added at {last_time}.
-                        </span>
-                        </div>
-                        """.format(
-                            action=action,
-                            last_time=last_time.strftime('%d-%b %I:%M %p')
-                        ),
-                        unsafe_allow_html=True
-                    )
-                    col_accept, col_decline = st.columns(2)
-
-                    with col_accept:
-                        accept_btn = st.button(
-                            "✅ Accept and Add",
-                            key=f"accept_{action}",
-                            help="Add anyway",
-                        )
-                        if accept_btn:
-                            new_row = [date, time_str, action, ""]
-                            sheet.append_row(new_row)
-                            st.success(f"Recorded: {action} at {date} {time_str}")
-                    with col_decline:
-                        decline_btn = st.button(
-                            "❌ Decline",
-                            key=f"decline_{action}",
-                            help="Do not add"
-                        )
-                        if decline_btn:
-                            st.info("Activity not logged.")
-                else:
-                    new_row = [date, time_str, action, ""]
-                    sheet.append_row(new_row)
-                    st.success(f"Recorded: {action} at {date} {time_str}")
-            else:
-                new_row = [date, time_str, action, ""]
-                sheet.append_row(new_row)
-                st.success(f"Recorded: {action} at {date} {time_str}")
+            new_row = [date, time_str, action, ""]
+            sheet.append_row(new_row)
+            st.success(f"Recorded: {action} at {date} {time_str}")
 
 with container2:
     st.header("Recent Activity")
