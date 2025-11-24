@@ -39,6 +39,21 @@ now_ist = datetime.now(ist)
 # Process data
 df_all = process_dataframe(data, ist)
 
+# Debugging steps (collapsible)
+with st.expander("🛠 Debugging Steps", expanded=False):
+    st.write("This section is for debugging and inspection of the filtered data.")
+    st.dataframe(df_all, hide_index=True, use_container_width=True)
+
+    # Single day data view
+    st.subheader("📅 View Data for a Single Day")
+    available_dates = sorted(df_all['Date'].unique(), reverse=True)
+    selected_day = st.selectbox("Select a date to view", options=available_dates)
+    df_single_day = df_all[df_all['Date'] == selected_day].copy()
+
+    st.write(f"Showing {len(df_single_day)} records for {selected_day}")
+    st.dataframe(df_single_day.sort_values(by='datetime', ascending=False)[['Date', 'Time', 'Action', 'Note']], hide_index=True, use_container_width=True)
+
+
 if df_all is not None and len(df_all) > 0:
     # Filter for last 3 days
     three_days_ago = now_ist - timedelta(days=3)
@@ -95,10 +110,6 @@ if df_all is not None and len(df_all) > 0:
     
     st.write(f"Showing {len(filtered_df)} records")
     
-    # Debugging steps (collapsible)
-    with st.expander("🛠 Debugging Steps", expanded=False):
-        st.write("This section is for debugging and inspection of the filtered data.")
-        st.dataframe(filtered_df, hide_index=True, use_container_width=True)
 
     
    # Display data - sort first, then select columns (use 'Note' not 'Notes')
