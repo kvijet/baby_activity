@@ -175,9 +175,21 @@ with st.expander("🛠 Debugging Steps", expanded=False):
                 total += (overlap_end - overlap_start).total_seconds()
             cur += timedelta(days=1)
         return total
+    
+    # helper: check if a datetime is in night window
+    def is_in_night_window(dt, night_start_hour=22, night_end_hour=7):
+        hour = dt.hour
+        if night_end_hour <= night_start_hour:
+            # window spans midnight (e.g., 22:00 to 7:00)
+            return hour >= night_start_hour or hour < night_end_hour
+        else:
+            # window within same day
+            return night_start_hour <= hour < night_end_hour
 
-    # classify using hybrid rules
+    # classify using hybrid rules and save night sleep windows
     classified = []
+    night_sleep_windows = []  # Save for later use
+    
     for p in sleep_pairs:
         dur_h = p['duration_seconds'] / 3600.0
         overlap_sec = night_overlap_seconds(p['start_dt'], p['end_dt'])
@@ -195,6 +207,12 @@ with st.expander("🛠 Debugging Steps", expanded=False):
         else:
             is_night = False
 
+        if is_night:
+            night_sleep_windows.append({
+                'start': p['start_dt'],
+                'end': p['end_dt']
+            })
+
         classified.append({
             'Slept At': p['start_dt'].strftime('%I:%M %p'),
             'Woke Up At': p['end_dt'].strftime('%I:%M %p'),
@@ -209,33 +227,71 @@ with st.expander("🛠 Debugging Steps", expanded=False):
         st.dataframe(sleep_df, hide_index=True, use_container_width=True)
 
         total_sleep_hours = sum(float(p['Duration (hours)']) for p in sleep_df.to_dict('records'))
-        st.caption(f"Total Sleep: {int(total_sleep_hours)}h {int((total_sleep_hours % 1) * 60)}m | Periods: {len(classified)}")
+        night_sleep_count = len([p for p in classified if p['Type'] == 'Night Sleep'])
+        nap_count = len([p for p in classified if p['Type'] == 'Nap'])
+        st.caption(f"Total Sleep: {int(total_sleep_hours)}h {int((total_sleep_hours % 1) * 60)}m | Night Sleep: {night_sleep_count} | Naps: {nap_count}")
     else:
         st.info("No complete sleep cycles found")
     
     st.divider()
     
-    # Solid Food Intervals
-    st.markdown("**🥘 Time Between Solid Food**")
+    # Helper function to classify interval as day or night
+    def classify_interval_time(dt):
+        """Classify if datetime is during day or night based on sleep windows and time"""
+        # First check if it's during a night sleep window
+        for window in night_sleep_windows:
+            if window['start'] <= dt <= window['end']:
+                return 'Night'
+        # Otherwise check if it's in typical night hours
+        if is_in_night_window(dt):
+            return 'Night'
+        return 'Day'
+    
+    # Solid Food Intervals with Day/Night Classification
+    st.markdown("**🥘 Time Between Solid Food (Day vs Night)**")
     solid_food_times = df_analysis[df_analysis['Action'] == 'Solid Food']['datetime'].tolist()
     
     if len(solid_food_times) > 1:
         solid_food_intervals = []
+        day_intervals = []
+        night_intervals = []
+        
         for i in range(1, len(solid_food_times)):
             interval = solid_food_times[i] - solid_food_times[i-1]
             hours = interval.total_seconds() / 3600
-            solid_food_intervals.append({
+            time_classification = classify_interval_time(solid_food_times[i])
+            
+            interval_data = {
                 'From': solid_food_times[i-1].strftime('%I:%M %p'),
                 'To': solid_food_times[i].strftime('%I:%M %p'),
                 'Interval (hours)': f"{hours:.2f}",
-                'Interval (h:m)': f"{int(hours)}h {int((hours % 1) * 60)}m"
-            })
+                'Interval (h:m)': f"{int(hours)}h {int((hours % 1) * 60)}m",
+                'Time': time_classification
+            }
+            solid_food_intervals.append(interval_data)
+            
+            if time_classification == 'Day':
+                day_intervals.append(hours)
+            else:
+                night_intervals.append(hours)
         
         solid_food_df = pd.DataFrame(solid_food_intervals)
         st.dataframe(solid_food_df, hide_index=True, use_container_width=True)
         
-        avg_interval = sum(float(i['Interval (hours)']) for i in solid_food_intervals) / len(solid_food_intervals)
-        st.caption(f"Total Feedings: {len(solid_food_times)} | Average Interval: {avg_interval:.2f}h")
+        # Summary with day/night breakdown
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Total Feedings", len(solid_food_times))
+        with col2:
+            if day_intervals:
+                st.metric("Day Avg Interval", f"{sum(day_intervals)/len(day_intervals):.2f}h")
+            else:
+                st.metric("Day Avg Interval", "N/A")
+        with col3:
+            if night_intervals:
+                st.metric("Night Avg Interval", f"{sum(night_intervals)/len(night_intervals):.2f}h")
+            else:
+                st.metric("Night Avg Interval", "N/A")
     elif len(solid_food_times) == 1:
         st.info(f"Only one solid food event at {solid_food_times[0].strftime('%I:%M %p')}")
     else:
@@ -243,27 +299,103 @@ with st.expander("🛠 Debugging Steps", expanded=False):
     
     st.divider()
     
-    # Diaper Change Intervals
-    st.markdown("**🚼 Time Between Diaper Changes**")
+    # Fed Intervals with Day/Night Classification
+    st.markdown("**🍼 Time Between Feeds (Day vs Night)**")
+    fed_times = df_analysis[df_analysis['Action'] == 'Fed']['datetime'].tolist()
+    
+    if len(fed_times) > 1:
+        fed_intervals = []
+        day_intervals = []
+        night_intervals = []
+        
+        for i in range(1, len(fed_times)):
+            interval = fed_times[i] - fed_times[i-1]
+            hours = interval.total_seconds() / 3600
+            time_classification = classify_interval_time(fed_times[i])
+            
+            interval_data = {
+                'From': fed_times[i-1].strftime('%I:%M %p'),
+                'To': fed_times[i].strftime('%I:%M %p'),
+                'Interval (hours)': f"{hours:.2f}",
+                'Interval (h:m)': f"{int(hours)}h {int((hours % 1) * 60)}m",
+                'Time': time_classification
+            }
+            fed_intervals.append(interval_data)
+            
+            if time_classification == 'Day':
+                day_intervals.append(hours)
+            else:
+                night_intervals.append(hours)
+        
+        fed_df = pd.DataFrame(fed_intervals)
+        st.dataframe(fed_df, hide_index=True, use_container_width=True)
+        
+        # Summary with day/night breakdown
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Total Feeds", len(fed_times))
+        with col2:
+            if day_intervals:
+                st.metric("Day Avg Interval", f"{sum(day_intervals)/len(day_intervals):.2f}h")
+            else:
+                st.metric("Day Avg Interval", "N/A")
+        with col3:
+            if night_intervals:
+                st.metric("Night Avg Interval", f"{sum(night_intervals)/len(night_intervals):.2f}h")
+            else:
+                st.metric("Night Avg Interval", "N/A")
+    elif len(fed_times) == 1:
+        st.info(f"Only one feed event at {fed_times[0].strftime('%I:%M %p')}")
+    else:
+        st.info("No feed events found")
+    
+    st.divider()
+    
+    # Diaper Change Intervals with Day/Night Classification
+    st.markdown("**🚼 Time Between Diaper Changes (Day vs Night)**")
     diaper_times = df_analysis[df_analysis['Action'] == 'Diaper Change']['datetime'].tolist()
     
     if len(diaper_times) > 1:
         diaper_intervals = []
+        day_intervals = []
+        night_intervals = []
+        
         for i in range(1, len(diaper_times)):
             interval = diaper_times[i] - diaper_times[i-1]
             hours = interval.total_seconds() / 3600
-            diaper_intervals.append({
+            time_classification = classify_interval_time(diaper_times[i])
+            
+            interval_data = {
                 'From': diaper_times[i-1].strftime('%I:%M %p'),
                 'To': diaper_times[i].strftime('%I:%M %p'),
                 'Interval (hours)': f"{hours:.2f}",
-                'Interval (h:m)': f"{int(hours)}h {int((hours % 1) * 60)}m"
-            })
+                'Interval (h:m)': f"{int(hours)}h {int((hours % 1) * 60)}m",
+                'Time': time_classification
+            }
+            diaper_intervals.append(interval_data)
+            
+            if time_classification == 'Day':
+                day_intervals.append(hours)
+            else:
+                night_intervals.append(hours)
         
         diaper_df = pd.DataFrame(diaper_intervals)
         st.dataframe(diaper_df, hide_index=True, use_container_width=True)
         
-        avg_interval = sum(float(i['Interval (hours)']) for i in diaper_intervals) / len(diaper_intervals)
-        st.caption(f"Total Changes: {len(diaper_times)} | Average Interval: {avg_interval:.2f}h")
+        # Summary with day/night breakdown
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Total Changes", len(diaper_times))
+        with col2:
+            if day_intervals:
+                st.metric("Day Avg Interval", f"{sum(day_intervals)/len(day_intervals):.2f}h")
+            else:
+                st.metric("Day Avg Interval", "N/A")
+        with col3:
+            if night_intervals:
+                st.metric("Night Avg Interval", f"{sum(night_intervals)/len(night_intervals):.2f}h")
+            else:
+                st.metric("Night Avg Interval", "N/A")
     elif len(diaper_times) == 1:
         st.info(f"Only one diaper change event at {diaper_times[0].strftime('%I:%M %p')}")
     else:
