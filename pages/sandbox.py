@@ -50,6 +50,32 @@ with st.expander("🛠 Debugging Steps", expanded=False):
     selected_day = st.selectbox("Select a date to view", options=available_dates)
     df_single_day = df_all[df_all['Date'] == selected_day].copy()
 
+    # Ensure correct order by time
+    df_single_day = df_single_day.sort_values(by='datetime', ascending=True).reset_index(drop=True)
+
+    # Check for missing "slept" or "woke up" at start of day
+    if len(df_single_day) > 0:
+        first_action = df_single_day.iloc[0]['Action'].lower()
+        first_time = df_single_day.iloc[0]['datetime']
+        midnight = first_time.replace(hour=0, minute=0, second=0, microsecond=0)
+
+        # If first action is "woke up" before any "slept", add "slept" at midnight
+        if first_action == "woke up":
+            new_row = df_single_day.iloc[0].copy()
+            new_row['datetime'] = midnight
+            new_row['Time'] = "00:00:00"
+            new_row['Action'] = "slept"
+            new_row['Note'] = ""
+            df_single_day = pd.concat([pd.DataFrame([new_row]), df_single_day], ignore_index=True)
+        # If first action is "slept" before any "woke up", add "woke up" at midnight
+        elif first_action == "slept":
+            new_row = df_single_day.iloc[0].copy()
+            new_row['datetime'] = midnight
+            new_row['Time'] = "00:00:00"
+            new_row['Action'] = "woke up"
+            new_row['Note'] = ""
+            df_single_day = pd.concat([pd.DataFrame([new_row]), df_single_day], ignore_index=True)
+
     st.write(f"Showing {len(df_single_day)} records for {selected_day}")
     st.dataframe(df_single_day.sort_values(by='datetime', ascending=False)[['Date', 'Time', 'Action', 'Note']], hide_index=True, use_container_width=True)
 
