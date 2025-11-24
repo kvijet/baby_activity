@@ -79,20 +79,24 @@ with st.expander("🛠 Debugging Steps", expanded=False):
             })
             current_sleep_start = None
     
-    # Add sleep periods as bars
-    for period in sleep_periods:
+    # Add sleep periods as horizontal bars (all on same line)
+    for i, period in enumerate(sleep_periods):
+        start_time = period['start'].hour + period['start'].minute/60 + period['start'].second/3600
+        end_time = period['end'].hour + period['end'].minute/60 + period['end'].second/3600
+        duration = end_time - start_time
+        
         fig.add_trace(go.Bar(
-            x=[period['end'] - period['start']],
+            x=[duration],
             y=['Sleep'],
-            base=period['start'].hour + period['start'].minute/60 + period['start'].second/3600,
+            base=start_time,
             orientation='h',
             marker=dict(color='lightblue', opacity=0.6),
-            name='Sleep Period',
-            showlegend=False,
-            hovertemplate=f"Sleep: {period['start'].strftime('%I:%M %p')} - {period['end'].strftime('%I:%M %p')}<extra></extra>"
+            name='Sleep Period' if i == 0 else '',
+            showlegend=(i == 0),
+            hovertemplate=f"Sleep: {period['start'].strftime('%I:%M %p')} - {period['end'].strftime('%I:%M %p')}<br>Duration: {int(duration)}h {int((duration % 1) * 60)}m<extra></extra>"
         ))
     
-    # Add other activities as markers
+    # Add other activities as markers (all on same line)
     other_activities = df_timeline[~df_timeline['Action'].str.lower().isin(['slept', 'woke up'])].copy()
     
     # Color mapping for different activities
@@ -104,43 +108,45 @@ with st.expander("🛠 Debugging Steps", expanded=False):
         'Water': 'blue'
     }
     
-    for activity_type in other_activities['Action'].unique():
-        activity_data = other_activities[other_activities['Action'] == activity_type]
-        times = activity_data['datetime'].dt.hour + activity_data['datetime'].dt.minute/60 + activity_data['datetime'].dt.second/3600
-        
-        fig.add_trace(go.Scatter(
-            x=times,
-            y=['Activities'] * len(times),
-            mode='markers',
-            marker=dict(
-                size=12,
-                color=activity_colors.get(activity_type, 'gray'),
-                symbol='diamond',
-                line=dict(width=2, color='white')
-            ),
-            name=activity_type,
-            text=[f"{activity_type}<br>{dt.strftime('%I:%M %p')}" for dt in activity_data['datetime']],
-            hovertemplate='%{text}<extra></extra>'
-        ))
+    if not other_activities.empty:
+        for activity_type in other_activities['Action'].unique():
+            activity_data = other_activities[other_activities['Action'] == activity_type]
+            times = activity_data['datetime'].dt.hour + activity_data['datetime'].dt.minute/60 + activity_data['datetime'].dt.second/3600
+            
+            fig.add_trace(go.Scatter(
+                x=times.tolist(),
+                y=['Activities'] * len(times),
+                mode='markers',
+                marker=dict(
+                    size=15,
+                    color=activity_colors.get(activity_type, 'gray'),
+                    symbol='circle',
+                    line=dict(width=2, color='white')
+                ),
+                name=activity_type,
+                text=[f"{activity_type}<br>{dt.strftime('%I:%M %p')}" for dt in activity_data['datetime']],
+                hovertemplate='%{text}<extra></extra>'
+            ))
     
     # Update layout
     fig.update_layout(
         title=f"24-Hour Timeline for {selected_day}",
         xaxis=dict(
-            title="Hour of Day",
-            tickmode='linear',
-            tick0=0,
-            dtick=2,
+            title="Time of Day",
+            tickmode='array',
             range=[0, 24],
-            ticktext=[f"{h:02d}:00" for h in range(0, 25, 2)],
-            tickvals=list(range(0, 25, 2))
+            tickvals=[0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24],
+            ticktext=['00:00', '02:00', '04:00', '06:00', '08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00', '24:00'],
+            showgrid=True,
+            gridcolor='lightgray'
         ),
         yaxis=dict(
             title="",
             categoryorder='array',
-            categoryarray=['Activities', 'Sleep']
+            categoryarray=['Activities', 'Sleep'],
+            showgrid=False
         ),
-        height=400,
+        height=300,
         hovermode='closest',
         showlegend=True,
         legend=dict(
@@ -149,7 +155,9 @@ with st.expander("🛠 Debugging Steps", expanded=False):
             y=1.02,
             xanchor="right",
             x=1
-        )
+        ),
+        barmode='overlay',
+        bargap=0
     )
     
     st.plotly_chart(fig, use_container_width=True)
