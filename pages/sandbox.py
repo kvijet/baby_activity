@@ -46,51 +46,75 @@ with st.expander("🛠 Debugging Steps", expanded=False):
     st.write("This section is for debugging and inspection of the filtered data.")
     
     # Create dictionary of dataframes for last 8 days
-    st.subheader("📅 Last 8 Days Data Processing")
+    st.subheader("📅 Last 8 Days Data Summary")
     
-    # Get dates for last 8 days (yesterday to 8 days ago)
-    date_dataframes = {}
-    yesterday = (now_ist - timedelta(days=1)).date()
+    # Get available dates
+    all_dates = sorted(df_all['Date'].unique(), reverse=True)
     
-    for days_back in range(1, 9):  # 1 to 8 days ago
-        target_date = (now_ist - timedelta(days=days_back)).date()
-        date_str = target_date.strftime('%d-%b-%Y')
-        
-        # Check if this date exists in the data
-        if date_str in df_all['Date'].values:
-            df_processed = fill_missing_sleep_wake_events(df_all, date_str)
-            date_dataframes[date_str] = df_processed
+    # Get yesterday and previous 7 days (total 8 days)
+    yesterday = (now_ist - timedelta(days=1)).strftime('%Y-%m-%d')
+    eight_days_ago = (now_ist - timedelta(days=8)).strftime('%Y-%m-%d')
     
-    # Display summary
-    st.write(f"Processed data for {len(date_dataframes)} days")
+    # Filter dates from yesterday to 8 days ago
+    date_range = []
+    for i in range(1, 9):  # 1 to 8 days ago
+        date_str = (now_ist - timedelta(days=i)).strftime('%Y-%m-%d')
+        if date_str in all_dates:
+            date_range.append(date_str)
     
-    # Display each day's data in expandable sections
-    for date_str, df_day in date_dataframes.items():
-        with st.expander(f"📆 {date_str} ({len(df_day)} records)", expanded=False):
-            col1, col2 = st.columns([1, 2])
-            
-            with col1:
-                # Summary metrics
-                sleep_count = len(df_day[df_day['Action'].str.lower() == 'slept'])
-                wake_count = len(df_day[df_day['Action'].str.lower() == 'woke up'])
-                other_count = len(df_day[~df_day['Action'].str.lower().isin(['slept', 'woke up'])])
-                
-                st.metric("Sleep Events", sleep_count)
-                st.metric("Wake Events", wake_count)
-                st.metric("Other Activities", other_count)
-            
-            with col2:
-                # Data table
-                display_cols = ['Time', 'Action', 'Note'] if 'Note' in df_day.columns else ['Time', 'Action']
-                st.dataframe(
-                    df_day.sort_values(by='datetime', ascending=False)[display_cols],
-                    hide_index=True,
-                    use_container_width=True
-                )
+    # Create dictionary of dataframes
+    dataframes_dict = {}
+    for date in date_range:
+        df_day = fill_missing_sleep_wake_events(df_all, date)
+        dataframes_dict[date] = df_day
+    
+    st.write(f"Created dataframes for {len(dataframes_dict)} days")
+    
+    # Display summary metrics
+    summary_cols = st.columns(4)
+    with summary_cols[0]:
+        st.metric("Total Days", len(dataframes_dict))
+    with summary_cols[1]:
+        total_records = sum(len(df) for df in dataframes_dict.values())
+        st.metric("Total Records", total_records)
+    with summary_cols[2]:
+        avg_records = total_records / len(dataframes_dict) if dataframes_dict else 0
+        st.metric("Avg Records/Day", f"{avg_records:.1f}")
+    with summary_cols[3]:
+        st.metric("Date Range", f"{date_range[-1] if date_range else 'N/A'} to {date_range[0] if date_range else 'N/A'}")
     
     st.divider()
     
-    # Single day data view with timeline
+    # Display each day's data in expandable sections
+    for date, df_day in dataframes_dict.items():
+        with st.expander(f"📆 {date} ({len(df_day)} records)", expanded=False):
+            # Display day statistics
+            col1, col2, col3, col4 = st.columns(4)
+            
+            sleep_count = len(df_day[df_day['Action'].str.lower() == 'slept'])
+            wake_count = len(df_day[df_day['Action'].str.lower() == 'woke up'])
+            fed_count = len(df_day[df_day['Action'] == 'Fed'])
+            diaper_count = len(df_day[df_day['Action'] == 'Diaper Change'])
+            
+            with col1:
+                st.metric("Sleep/Wake Events", f"{sleep_count}/{wake_count}")
+            with col2:
+                st.metric("Fed", fed_count)
+            with col3:
+                st.metric("Diaper Changes", diaper_count)
+            with col4:
+                st.metric("Total Activities", len(df_day))
+            
+            # Display the dataframe
+            st.dataframe(
+                df_day.sort_values(by='datetime', ascending=False)[['Date', 'Time', 'Action', 'Note']], 
+                hide_index=True, 
+                use_container_width=True
+            )
+    
+    st.divider()
+    
+    # Single day data view
     st.subheader("📅 View Data for a Single Day")
     available_dates = sorted(df_all['Date'].unique(), reverse=True)
     selected_day = st.selectbox("Select a date to view", options=available_dates)
