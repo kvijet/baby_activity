@@ -7,7 +7,8 @@ from utils import (
     load_sheet_data,
     initialize_google_sheets,
     process_dataframe,
-    load_css
+    load_css,
+    fill_missing_sleep_wake_events
 )
 
 st.set_page_config(
@@ -42,58 +43,14 @@ df_all = process_dataframe(data, ist)
 # Debugging steps (collapsible)
 with st.expander("🛠 Debugging Steps", expanded=False):
     st.write("This section is for debugging and inspection of the filtered data.")
-    st.dataframe(df_all, hide_index=True, use_container_width=True)
-
+    
     # Single day data view
     st.subheader("📅 View Data for a Single Day")
     available_dates = sorted(df_all['Date'].unique(), reverse=True)
     selected_day = st.selectbox("Select a date to view", options=available_dates)
-    df_single_day = df_all[df_all['Date'] == selected_day].copy()
-
-    # Ensure correct order by time
-    df_single_day = df_single_day.sort_values(by='datetime', ascending=True).reset_index(drop=True)
-
-    # Check for missing "slept" or "woke up" at start/end of day (only among slept/woke up events)
-    if len(df_single_day) > 0:
-        slept_woke_df = df_single_day[df_single_day['Action'].str.lower().isin(['slept', 'woke up'])].copy()
-        if not slept_woke_df.empty:
-            # Start of day
-            first_sw_action = slept_woke_df.iloc[0]['Action'].lower()
-            first_sw_time = slept_woke_df.iloc[0]['datetime']
-            midnight = first_sw_time.replace(hour=0, minute=0, second=0, microsecond=0)
-            if first_sw_action == "woke up":
-                new_row = slept_woke_df.iloc[0].copy()
-                new_row['datetime'] = midnight
-                new_row['Time'] = "00:00:00"
-                new_row['Action'] = "slept"
-                new_row['Note'] = ""
-                df_single_day = pd.concat([pd.DataFrame([new_row]), df_single_day], ignore_index=True)
-            elif first_sw_action == "slept":
-                new_row = slept_woke_df.iloc[0].copy()
-                new_row['datetime'] = midnight
-                new_row['Time'] = "00:00:00"
-                new_row['Action'] = "woke up"
-                new_row['Note'] = ""
-                df_single_day = pd.concat([pd.DataFrame([new_row]), df_single_day], ignore_index=True)
-
-            # End of day
-            last_sw_action = slept_woke_df.iloc[-1]['Action'].lower()
-            last_sw_time = slept_woke_df.iloc[-1]['datetime']
-            end_of_day = last_sw_time.replace(hour=23, minute=59, second=59, microsecond=0)
-            if last_sw_action == "slept":
-                new_row = slept_woke_df.iloc[-1].copy()
-                new_row['datetime'] = end_of_day
-                new_row['Time'] = "23:59:59"
-                new_row['Action'] = "woke up"
-                new_row['Note'] = ""
-                df_single_day = pd.concat([df_single_day, pd.DataFrame([new_row])], ignore_index=True)
-            elif last_sw_action == "woke up":
-                new_row = slept_woke_df.iloc[-1].copy()
-                new_row['datetime'] = end_of_day
-                new_row['Time'] = "23:59:59"
-                new_row['Action'] = "slept"
-                new_row['Note'] = ""
-                df_single_day = pd.concat([df_single_day, pd.DataFrame([new_row])], ignore_index=True)
+    
+    # Use the utility function to fill missing sleep/wake events
+    df_single_day = fill_missing_sleep_wake_events(df_all, selected_day)
 
     st.write(f"Showing {len(df_single_day)} records for {selected_day}")
     st.dataframe(df_single_day.sort_values(by='datetime', ascending=False)[['Date', 'Time', 'Action', 'Note']], hide_index=True, use_container_width=True)

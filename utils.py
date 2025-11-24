@@ -255,3 +255,63 @@ def get_most_recent_activity(df):
         last_row = df.sort_values("datetime", ascending=False).iloc[0]
         return last_row["Action"], last_row["datetime"]
     return None, None
+
+def fill_missing_sleep_wake_events(df: pd.DataFrame, selected_date: str) -> pd.DataFrame:
+    """
+    Fill missing 'slept' or 'woke up' events at the start and end of a given day.
+    
+    Args:
+        df: DataFrame containing all activity data with columns: Date, Time, Action, Note, datetime
+        selected_date: Date string to filter and process (format should match df['Date'])
+    
+    Returns:
+        DataFrame with added sleep/wake events at day boundaries if needed
+    """
+    df_single_day = df[df['Date'] == selected_date].copy()
+    
+    # Ensure correct order by time
+    df_single_day = df_single_day.sort_values(by='datetime', ascending=True).reset_index(drop=True)
+    
+    # Check for missing "slept" or "woke up" at start/end of day (only among slept/woke up events)
+    if len(df_single_day) > 0:
+        slept_woke_df = df_single_day[df_single_day['Action'].str.lower().isin(['slept', 'woke up'])].copy()
+        if not slept_woke_df.empty:
+            # Start of day
+            first_sw_action = slept_woke_df.iloc[0]['Action'].lower()
+            first_sw_time = slept_woke_df.iloc[0]['datetime']
+            midnight = first_sw_time.replace(hour=0, minute=0, second=0, microsecond=0)
+            if first_sw_action == "woke up":
+                new_row = slept_woke_df.iloc[0].copy()
+                new_row['datetime'] = midnight
+                new_row['Time'] = "00:00:00"
+                new_row['Action'] = "slept"
+                new_row['Note'] = ""
+                df_single_day = pd.concat([pd.DataFrame([new_row]), df_single_day], ignore_index=True)
+            elif first_sw_action == "slept":
+                new_row = slept_woke_df.iloc[0].copy()
+                new_row['datetime'] = midnight
+                new_row['Time'] = "00:00:00"
+                new_row['Action'] = "woke up"
+                new_row['Note'] = ""
+                df_single_day = pd.concat([pd.DataFrame([new_row]), df_single_day], ignore_index=True)
+
+            # End of day
+            last_sw_action = slept_woke_df.iloc[-1]['Action'].lower()
+            last_sw_time = slept_woke_df.iloc[-1]['datetime']
+            end_of_day = last_sw_time.replace(hour=23, minute=59, second=59, microsecond=0)
+            if last_sw_action == "slept":
+                new_row = slept_woke_df.iloc[-1].copy()
+                new_row['datetime'] = end_of_day
+                new_row['Time'] = "23:59:59"
+                new_row['Action'] = "woke up"
+                new_row['Note'] = ""
+                df_single_day = pd.concat([df_single_day, pd.DataFrame([new_row])], ignore_index=True)
+            elif last_sw_action == "woke up":
+                new_row = slept_woke_df.iloc[-1].copy()
+                new_row['datetime'] = end_of_day
+                new_row['Time'] = "23:59:59"
+                new_row['Action'] = "slept"
+                new_row['Note'] = ""
+                df_single_day = pd.concat([df_single_day, pd.DataFrame([new_row])], ignore_index=True)
+    
+    return df_single_day
