@@ -95,11 +95,13 @@ if df_all is not None and len(df_all) > 0:
     
     st.write(f"Showing {len(filtered_df)} records")
     
-    #start of debugging
-    st.dataframe(filtered_df, hide_index=True, use_container_width=True)
-    #end of debugging
+    # Debugging steps (collapsible)
+    with st.expander("🛠 Debugging Steps", expanded=False):
+        st.write("This section is for debugging and inspection of the filtered data.")
+        st.dataframe(filtered_df, hide_index=True, use_container_width=True)
+
     
-    # Display data - sort first, then select columns (use 'Note' not 'Notes')
+   # Display data - sort first, then select columns (use 'Note' not 'Notes')
     display_df = filtered_df.sort_values(by='datetime', ascending=False)[['Date', 'Time', 'Action', 'Note']]
     st.dataframe(display_df, hide_index=True, use_container_width=True)
     
