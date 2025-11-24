@@ -3,6 +3,7 @@ import pytz
 from datetime import datetime, timedelta
 from pathlib import Path
 import pandas as pd
+from datetime import time
 import plotly.graph_objects as go
 from utils import (
     load_sheet_data,
@@ -136,27 +137,79 @@ with st.expander("🛠 Debugging Steps", expanded=False):
     sleep_pairs = []
     current_sleep_start = None
     
+    # build sleep pairs (keep raw datetimes for classification)
+    sleep_pairs = []
+    current_sleep_start = None
+
     for idx, row in df_analysis.iterrows():
         if row['Action'].lower() == 'slept':
-            current_sleep_start = row
+            current_sleep_start = row['datetime']
         elif row['Action'].lower() == 'woke up' and current_sleep_start is not None:
-            duration = row['datetime'] - current_sleep_start['datetime']
-            hours = duration.total_seconds() / 3600
+            start_dt = current_sleep_start
+            end_dt = row['datetime']
+            duration = (end_dt - start_dt).total_seconds()
             sleep_pairs.append({
-                'Slept At': current_sleep_start['datetime'].strftime('%I:%M %p'),
-                'Woke Up At': row['datetime'].strftime('%I:%M %p'),
-                'Duration (hours)': f"{hours:.2f}",
-                'Duration (h:m)': f"{int(hours)}h {int((hours % 1) * 60)}m"
+                'start_dt': start_dt,
+                'end_dt': end_dt,
+                'duration_seconds': duration
             })
             current_sleep_start = None
-    
-    if sleep_pairs:
-        sleep_df = pd.DataFrame(sleep_pairs)
+
+    # helper: compute overlap seconds with night window (handles windows that span midnight)
+    def night_overlap_seconds(start_dt, end_dt, night_start_hour=22, night_end_hour=7):
+        total = 0
+        # consider candidate night windows for days spanning the sleep period
+        day0 = (start_dt.date() - timedelta(days=1))
+        dayN = (end_dt.date() + timedelta(days=1))
+        cur = day0
+        while cur <= dayN:
+            if night_end_hour <= night_start_hour:
+                window_start = datetime.combine(cur, time(hour=night_start_hour, minute=0, tzinfo=start_dt.tzinfo))
+                window_end = datetime.combine(cur + timedelta(days=1), time(hour=night_end_hour, minute=0, tzinfo=start_dt.tzinfo))
+            else:
+                window_start = datetime.combine(cur, time(hour=night_start_hour, minute=0, tzinfo=start_dt.tzinfo))
+                window_end = datetime.combine(cur, time(hour=night_end_hour, minute=0, tzinfo=start_dt.tzinfo))
+            overlap_start = max(start_dt, window_start)
+            overlap_end = min(end_dt, window_end)
+            if overlap_end > overlap_start:
+                total += (overlap_end - overlap_start).total_seconds()
+            cur += timedelta(days=1)
+        return total
+
+    # classify using hybrid rules
+    classified = []
+    for p in sleep_pairs:
+        dur_h = p['duration_seconds'] / 3600.0
+        overlap_sec = night_overlap_seconds(p['start_dt'], p['end_dt'])
+        overlap_ratio = overlap_sec / p['duration_seconds'] if p['duration_seconds'] > 0 else 0
+
+        # rules (tune thresholds as needed):
+        # - if majority of sleep is in night window -> night
+        # - OR if very long (>= 3.0h) and overlaps night at all -> night
+        # - otherwise -> nap
+        is_night = False
+        if overlap_ratio >= 0.5:
+            is_night = True
+        elif dur_h >= 3.0 and overlap_ratio > 0.0:
+            is_night = True
+        else:
+            is_night = False
+
+        classified.append({
+            'Slept At': p['start_dt'].strftime('%I:%M %p'),
+            'Woke Up At': p['end_dt'].strftime('%I:%M %p'),
+            'Duration (h:m)': f"{int(dur_h)}h {int((dur_h % 1)*60)}m",
+            'Duration (hours)': f"{dur_h:.2f}",
+            'Overlap with night (%)': f"{overlap_ratio*100:.0f}%",
+            'Type': 'Night Sleep' if is_night else 'Nap'
+        })
+
+    if classified:
+        sleep_df = pd.DataFrame(classified)
         st.dataframe(sleep_df, hide_index=True, use_container_width=True)
-        
-        # Total sleep summary
-        total_sleep_hours = sum(float(p['Duration (hours)']) for p in sleep_pairs)
-        st.caption(f"Total Sleep: {int(total_sleep_hours)}h {int((total_sleep_hours % 1) * 60)}m | Average Sleep: {total_sleep_hours/len(sleep_pairs):.2f}h per period")
+
+        total_sleep_hours = sum(float(p['Duration (hours)']) for p in sleep_df.to_dict('records'))
+        st.caption(f"Total Sleep: {int(total_sleep_hours)}h {int((total_sleep_hours % 1) * 60)}m | Periods: {len(classified)}")
     else:
         st.info("No complete sleep cycles found")
     
