@@ -99,8 +99,8 @@ if df_all is not None and len(df_all) > 0:
     st.dataframe(filtered_df, hide_index=True, use_container_width=True)
     #end of debugging
     
-    # Display data - sort first, then select columns
-    display_df = filtered_df.sort_values(by='datetime', ascending=False)[['Date', 'Time', 'Action', 'Notes']]
+    # Display data - sort first, then select columns (use 'Note' not 'Notes')
+    display_df = filtered_df.sort_values(by='datetime', ascending=False)[['Date', 'Time', 'Action', 'Note']]
     st.dataframe(display_df, hide_index=True, use_container_width=True)
     
     st.divider()
