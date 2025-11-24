@@ -76,6 +76,28 @@ with st.expander("🛠 Debugging Steps", expanded=False):
             new_row['Note'] = ""
             df_single_day = pd.concat([pd.DataFrame([new_row]), df_single_day], ignore_index=True)
 
+        # Check for missing "slept" or "woke up" at end of day
+        last_action = df_single_day.iloc[-1]['Action'].lower()
+        last_time = df_single_day.iloc[-1]['datetime']
+        end_of_day = last_time.replace(hour=23, minute=59, second=59, microsecond=0)
+
+        # If last action is "slept", add "woke up" at 23:59:59
+        if last_action == "slept":
+            new_row = df_single_day.iloc[-1].copy()
+            new_row['datetime'] = end_of_day
+            new_row['Time'] = "23:59:59"
+            new_row['Action'] = "woke up"
+            new_row['Note'] = ""
+            df_single_day = pd.concat([df_single_day, pd.DataFrame([new_row])], ignore_index=True)
+        # If last action is "woke up", add "slept" at 23:59:59
+        elif last_action == "woke up":
+            new_row = df_single_day.iloc[-1].copy()
+            new_row['datetime'] = end_of_day
+            new_row['Time'] = "23:59:59"
+            new_row['Action'] = "slept"
+            new_row['Note'] = ""
+            df_single_day = pd.concat([df_single_day, pd.DataFrame([new_row])], ignore_index=True)
+
     st.write(f"Showing {len(df_single_day)} records for {selected_day}")
     st.dataframe(df_single_day.sort_values(by='datetime', ascending=False)[['Date', 'Time', 'Action', 'Note']], hide_index=True, use_container_width=True)
 
