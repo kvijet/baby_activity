@@ -224,18 +224,17 @@ with st.expander("🛠 Debugging Steps", expanded=False):
 
     if classified:
         sleep_df = pd.DataFrame(classified)
-        # Use column_config to control widths
         st.dataframe(
             sleep_df, 
             hide_index=True, 
             use_container_width=True,
             column_config={
-                "Slept At": st.column_config.TextColumn(width="small"),
-                "Woke Up At": st.column_config.TextColumn(width="small"),
-                "Duration (h:m)": st.column_config.TextColumn(width="small"),
-                "Duration (hours)": st.column_config.TextColumn(width="small"),
-                "Overlap with night (%)": st.column_config.TextColumn(width="small"),
-                "Type": st.column_config.TextColumn(width="small")
+                'Slept At': st.column_config.TextColumn(width='small'),
+                'Woke Up At': st.column_config.TextColumn(width='small'),
+                'Duration (h:m)': st.column_config.TextColumn(width='small'),
+                'Duration (hours)': st.column_config.TextColumn(width='small'),
+                'Overlap with night (%)': st.column_config.TextColumn(width='small'),
+                'Type': st.column_config.TextColumn(width='small')
             }
         )
 
@@ -277,7 +276,7 @@ with st.expander("🛠 Debugging Steps", expanded=False):
             interval_data = {
                 'From': solid_food_times[i-1].strftime('%I:%M %p'),
                 'To': solid_food_times[i].strftime('%I:%M %p'),
-                'Interval': f"{int(hours)}h {int((hours % 1) * 60)}m",
+                'Interval (h:m)': f"{int(hours)}h {int((hours % 1) * 60)}m",
                 'Time': time_classification
             }
             solid_food_intervals.append(interval_data)
@@ -293,10 +292,10 @@ with st.expander("🛠 Debugging Steps", expanded=False):
             hide_index=True, 
             use_container_width=True,
             column_config={
-                "From": st.column_config.TextColumn(width="medium"),
-                "To": st.column_config.TextColumn(width="medium"),
-                "Interval": st.column_config.TextColumn(width="medium"),
-                "Time": st.column_config.TextColumn(width="small")
+                'From': st.column_config.TextColumn(width='medium'),
+                'To': st.column_config.TextColumn(width='medium'),
+                'Interval (h:m)': st.column_config.TextColumn(width='medium'),
+                'Time': st.column_config.TextColumn(width='small')
             }
         )
         
@@ -338,7 +337,7 @@ with st.expander("🛠 Debugging Steps", expanded=False):
             interval_data = {
                 'From': fed_times[i-1].strftime('%I:%M %p'),
                 'To': fed_times[i].strftime('%I:%M %p'),
-                'Interval': f"{int(hours)}h {int((hours % 1) * 60)}m",
+                'Interval (h:m)': f"{int(hours)}h {int((hours % 1) * 60)}m",
                 'Time': time_classification
             }
             fed_intervals.append(interval_data)
@@ -354,10 +353,10 @@ with st.expander("🛠 Debugging Steps", expanded=False):
             hide_index=True, 
             use_container_width=True,
             column_config={
-                "From": st.column_config.TextColumn(width="medium"),
-                "To": st.column_config.TextColumn(width="medium"),
-                "Interval": st.column_config.TextColumn(width="medium"),
-                "Time": st.column_config.TextColumn(width="small")
+                'From': st.column_config.TextColumn(width='medium'),
+                'To': st.column_config.TextColumn(width='medium'),
+                'Interval (h:m)': st.column_config.TextColumn(width='medium'),
+                'Time': st.column_config.TextColumn(width='small')
             }
         )
         
@@ -399,7 +398,7 @@ with st.expander("🛠 Debugging Steps", expanded=False):
             interval_data = {
                 'From': diaper_times[i-1].strftime('%I:%M %p'),
                 'To': diaper_times[i].strftime('%I:%M %p'),
-                'Interval': f"{int(hours)}h {int((hours % 1) * 60)}m",
+                'Interval (h:m)': f"{int(hours)}h {int((hours % 1) * 60)}m",
                 'Time': time_classification
             }
             diaper_intervals.append(interval_data)
@@ -415,10 +414,10 @@ with st.expander("🛠 Debugging Steps", expanded=False):
             hide_index=True, 
             use_container_width=True,
             column_config={
-                "From": st.column_config.TextColumn(width="medium"),
-                "To": st.column_config.TextColumn(width="medium"),
-                "Interval": st.column_config.TextColumn(width="medium"),
-                "Time": st.column_config.TextColumn(width="small")
+                'From': st.column_config.TextColumn(width='medium'),
+                'To': st.column_config.TextColumn(width='medium'),
+                'Interval (h:m)': st.column_config.TextColumn(width='medium'),
+                'Time': st.column_config.TextColumn(width='small')
             }
         )
         
