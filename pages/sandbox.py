@@ -3,6 +3,7 @@ import pytz
 from datetime import datetime, timedelta
 from pathlib import Path
 import pandas as pd
+import plotly.graph_objects as go
 from utils import (
     load_sheet_data,
     initialize_google_sheets,
@@ -54,6 +55,104 @@ with st.expander("🛠 Debugging Steps", expanded=False):
 
     st.write(f"Showing {len(df_single_day)} records for {selected_day}")
     st.dataframe(df_single_day.sort_values(by='datetime', ascending=False)[['Date', 'Time', 'Action', 'Note']], hide_index=True, use_container_width=True)
+    
+    # 24-hour Timeline Visualization
+    st.subheader("⏰ 24-Hour Timeline")
+    
+    # Sort by datetime for timeline
+    df_timeline = df_single_day.sort_values(by='datetime', ascending=True).copy()
+    
+    # Create figure
+    fig = go.Figure()
+    
+    # Process sleep periods (Gantt chart bars)
+    sleep_periods = []
+    current_sleep_start = None
+    
+    for idx, row in df_timeline.iterrows():
+        if row['Action'].lower() == 'slept':
+            current_sleep_start = row['datetime']
+        elif row['Action'].lower() == 'woke up' and current_sleep_start is not None:
+            sleep_periods.append({
+                'start': current_sleep_start,
+                'end': row['datetime']
+            })
+            current_sleep_start = None
+    
+    # Add sleep periods as bars
+    for period in sleep_periods:
+        fig.add_trace(go.Bar(
+            x=[period['end'] - period['start']],
+            y=['Sleep'],
+            base=period['start'].hour + period['start'].minute/60 + period['start'].second/3600,
+            orientation='h',
+            marker=dict(color='lightblue', opacity=0.6),
+            name='Sleep Period',
+            showlegend=False,
+            hovertemplate=f"Sleep: {period['start'].strftime('%I:%M %p')} - {period['end'].strftime('%I:%M %p')}<extra></extra>"
+        ))
+    
+    # Add other activities as markers
+    other_activities = df_timeline[~df_timeline['Action'].str.lower().isin(['slept', 'woke up'])].copy()
+    
+    # Color mapping for different activities
+    activity_colors = {
+        'Fed': 'green',
+        'Solid Food': 'orange',
+        'Diaper Change': 'brown',
+        'Potty': 'purple',
+        'Water': 'blue'
+    }
+    
+    for activity_type in other_activities['Action'].unique():
+        activity_data = other_activities[other_activities['Action'] == activity_type]
+        times = activity_data['datetime'].dt.hour + activity_data['datetime'].dt.minute/60 + activity_data['datetime'].dt.second/3600
+        
+        fig.add_trace(go.Scatter(
+            x=times,
+            y=['Activities'] * len(times),
+            mode='markers',
+            marker=dict(
+                size=12,
+                color=activity_colors.get(activity_type, 'gray'),
+                symbol='diamond',
+                line=dict(width=2, color='white')
+            ),
+            name=activity_type,
+            text=[f"{activity_type}<br>{dt.strftime('%I:%M %p')}" for dt in activity_data['datetime']],
+            hovertemplate='%{text}<extra></extra>'
+        ))
+    
+    # Update layout
+    fig.update_layout(
+        title=f"24-Hour Timeline for {selected_day}",
+        xaxis=dict(
+            title="Hour of Day",
+            tickmode='linear',
+            tick0=0,
+            dtick=2,
+            range=[0, 24],
+            ticktext=[f"{h:02d}:00" for h in range(0, 25, 2)],
+            tickvals=list(range(0, 25, 2))
+        ),
+        yaxis=dict(
+            title="",
+            categoryorder='array',
+            categoryarray=['Activities', 'Sleep']
+        ),
+        height=400,
+        hovermode='closest',
+        showlegend=True,
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
+        )
+    )
+    
+    st.plotly_chart(fig, use_container_width=True)
 
 
 if df_all is not None and len(df_all) > 0:
