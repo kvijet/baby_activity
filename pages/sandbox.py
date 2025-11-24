@@ -45,7 +45,52 @@ df_all = process_dataframe(data, ist)
 with st.expander("🛠 Debugging Steps", expanded=False):
     st.write("This section is for debugging and inspection of the filtered data.")
     
-    # Single day data view
+    # Create dictionary of dataframes for last 8 days
+    st.subheader("📅 Last 8 Days Data Processing")
+    
+    # Get dates for last 8 days (yesterday to 8 days ago)
+    date_dataframes = {}
+    yesterday = (now_ist - timedelta(days=1)).date()
+    
+    for days_back in range(1, 9):  # 1 to 8 days ago
+        target_date = (now_ist - timedelta(days=days_back)).date()
+        date_str = target_date.strftime('%d-%b-%Y')
+        
+        # Check if this date exists in the data
+        if date_str in df_all['Date'].values:
+            df_processed = fill_missing_sleep_wake_events(df_all, date_str)
+            date_dataframes[date_str] = df_processed
+    
+    # Display summary
+    st.write(f"Processed data for {len(date_dataframes)} days")
+    
+    # Display each day's data in expandable sections
+    for date_str, df_day in date_dataframes.items():
+        with st.expander(f"📆 {date_str} ({len(df_day)} records)", expanded=False):
+            col1, col2 = st.columns([1, 2])
+            
+            with col1:
+                # Summary metrics
+                sleep_count = len(df_day[df_day['Action'].str.lower() == 'slept'])
+                wake_count = len(df_day[df_day['Action'].str.lower() == 'woke up'])
+                other_count = len(df_day[~df_day['Action'].str.lower().isin(['slept', 'woke up'])])
+                
+                st.metric("Sleep Events", sleep_count)
+                st.metric("Wake Events", wake_count)
+                st.metric("Other Activities", other_count)
+            
+            with col2:
+                # Data table
+                display_cols = ['Time', 'Action', 'Note'] if 'Note' in df_day.columns else ['Time', 'Action']
+                st.dataframe(
+                    df_day.sort_values(by='datetime', ascending=False)[display_cols],
+                    hide_index=True,
+                    use_container_width=True
+                )
+    
+    st.divider()
+    
+    # Single day data view with timeline
     st.subheader("📅 View Data for a Single Day")
     available_dates = sorted(df_all['Date'].unique(), reverse=True)
     selected_day = st.selectbox("Select a date to view", options=available_dates)
