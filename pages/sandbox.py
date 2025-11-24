@@ -224,7 +224,20 @@ with st.expander("🛠 Debugging Steps", expanded=False):
 
     if classified:
         sleep_df = pd.DataFrame(classified)
-        st.dataframe(sleep_df, hide_index=True, use_container_width=True, height=300)
+        # Use column_config to control widths
+        st.dataframe(
+            sleep_df, 
+            hide_index=True, 
+            use_container_width=True,
+            column_config={
+                "Slept At": st.column_config.TextColumn(width="small"),
+                "Woke Up At": st.column_config.TextColumn(width="small"),
+                "Duration (h:m)": st.column_config.TextColumn(width="small"),
+                "Duration (hours)": st.column_config.TextColumn(width="small"),
+                "Overlap with night (%)": st.column_config.TextColumn(width="small"),
+                "Type": st.column_config.TextColumn(width="small")
+            }
+        )
 
         total_sleep_hours = sum(float(p['Duration (hours)']) for p in sleep_df.to_dict('records'))
         night_sleep_count = len([p for p in classified if p['Type'] == 'Night Sleep'])
@@ -264,7 +277,7 @@ with st.expander("🛠 Debugging Steps", expanded=False):
             interval_data = {
                 'From': solid_food_times[i-1].strftime('%I:%M %p'),
                 'To': solid_food_times[i].strftime('%I:%M %p'),
-                'Interval (h:m)': f"{int(hours)}h {int((hours % 1) * 60)}m",
+                'Interval': f"{int(hours)}h {int((hours % 1) * 60)}m",
                 'Time': time_classification
             }
             solid_food_intervals.append(interval_data)
@@ -275,7 +288,17 @@ with st.expander("🛠 Debugging Steps", expanded=False):
                 night_intervals.append(hours)
         
         solid_food_df = pd.DataFrame(solid_food_intervals)
-        st.dataframe(solid_food_df, hide_index=True, use_container_width=True, height=min(300, len(solid_food_df) * 35 + 38))
+        st.dataframe(
+            solid_food_df, 
+            hide_index=True, 
+            use_container_width=True,
+            column_config={
+                "From": st.column_config.TextColumn(width="medium"),
+                "To": st.column_config.TextColumn(width="medium"),
+                "Interval": st.column_config.TextColumn(width="medium"),
+                "Time": st.column_config.TextColumn(width="small")
+            }
+        )
         
         # Summary with day/night breakdown
         col1, col2, col3 = st.columns(3)
@@ -315,7 +338,7 @@ with st.expander("🛠 Debugging Steps", expanded=False):
             interval_data = {
                 'From': fed_times[i-1].strftime('%I:%M %p'),
                 'To': fed_times[i].strftime('%I:%M %p'),
-                'Interval (h:m)': f"{int(hours)}h {int((hours % 1) * 60)}m",
+                'Interval': f"{int(hours)}h {int((hours % 1) * 60)}m",
                 'Time': time_classification
             }
             fed_intervals.append(interval_data)
@@ -326,7 +349,17 @@ with st.expander("🛠 Debugging Steps", expanded=False):
                 night_intervals.append(hours)
         
         fed_df = pd.DataFrame(fed_intervals)
-        st.dataframe(fed_df, hide_index=True, use_container_width=True, height=min(300, len(fed_df) * 35 + 38))
+        st.dataframe(
+            fed_df, 
+            hide_index=True, 
+            use_container_width=True,
+            column_config={
+                "From": st.column_config.TextColumn(width="medium"),
+                "To": st.column_config.TextColumn(width="medium"),
+                "Interval": st.column_config.TextColumn(width="medium"),
+                "Time": st.column_config.TextColumn(width="small")
+            }
+        )
         
         # Summary with day/night breakdown
         col1, col2, col3 = st.columns(3)
@@ -366,7 +399,7 @@ with st.expander("🛠 Debugging Steps", expanded=False):
             interval_data = {
                 'From': diaper_times[i-1].strftime('%I:%M %p'),
                 'To': diaper_times[i].strftime('%I:%M %p'),
-                'Interval (h:m)': f"{int(hours)}h {int((hours % 1) * 60)}m",
+                'Interval': f"{int(hours)}h {int((hours % 1) * 60)}m",
                 'Time': time_classification
             }
             diaper_intervals.append(interval_data)
@@ -377,7 +410,17 @@ with st.expander("🛠 Debugging Steps", expanded=False):
                 night_intervals.append(hours)
         
         diaper_df = pd.DataFrame(diaper_intervals)
-        st.dataframe(diaper_df, hide_index=True, use_container_width=True, height=min(300, len(diaper_df) * 35 + 38))
+        st.dataframe(
+            diaper_df, 
+            hide_index=True, 
+            use_container_width=True,
+            column_config={
+                "From": st.column_config.TextColumn(width="medium"),
+                "To": st.column_config.TextColumn(width="medium"),
+                "Interval": st.column_config.TextColumn(width="medium"),
+                "Time": st.column_config.TextColumn(width="small")
+            }
+        )
         
         # Summary with day/night breakdown
         col1, col2, col3 = st.columns(3)
