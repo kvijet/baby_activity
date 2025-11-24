@@ -125,6 +125,97 @@ with st.expander("🛠 Debugging Steps", expanded=False):
     st.write(f"Showing {len(df_single_day)} records for {selected_day}")
     st.dataframe(df_single_day.sort_values(by='datetime', ascending=False)[['Date', 'Time', 'Action', 'Note']], hide_index=True, use_container_width=True)
     
+    # Analysis: Sleep durations and activity intervals
+    st.subheader("📊 Activity Analysis")
+    
+    # Sort by datetime for analysis
+    df_analysis = df_single_day.sort_values(by='datetime', ascending=True).copy()
+    
+    # Sleep Duration Analysis
+    st.markdown("**😴 Sleep Durations**")
+    sleep_pairs = []
+    current_sleep_start = None
+    
+    for idx, row in df_analysis.iterrows():
+        if row['Action'].lower() == 'slept':
+            current_sleep_start = row
+        elif row['Action'].lower() == 'woke up' and current_sleep_start is not None:
+            duration = row['datetime'] - current_sleep_start['datetime']
+            hours = duration.total_seconds() / 3600
+            sleep_pairs.append({
+                'Slept At': current_sleep_start['datetime'].strftime('%I:%M %p'),
+                'Woke Up At': row['datetime'].strftime('%I:%M %p'),
+                'Duration (hours)': f"{hours:.2f}",
+                'Duration (h:m)': f"{int(hours)}h {int((hours % 1) * 60)}m"
+            })
+            current_sleep_start = None
+    
+    if sleep_pairs:
+        sleep_df = pd.DataFrame(sleep_pairs)
+        st.dataframe(sleep_df, hide_index=True, use_container_width=True)
+        
+        # Total sleep summary
+        total_sleep_hours = sum(float(p['Duration (hours)']) for p in sleep_pairs)
+        st.caption(f"Total Sleep: {int(total_sleep_hours)}h {int((total_sleep_hours % 1) * 60)}m | Average Sleep: {total_sleep_hours/len(sleep_pairs):.2f}h per period")
+    else:
+        st.info("No complete sleep cycles found")
+    
+    st.divider()
+    
+    # Solid Food Intervals
+    st.markdown("**🥘 Time Between Solid Food**")
+    solid_food_times = df_analysis[df_analysis['Action'] == 'Solid Food']['datetime'].tolist()
+    
+    if len(solid_food_times) > 1:
+        solid_food_intervals = []
+        for i in range(1, len(solid_food_times)):
+            interval = solid_food_times[i] - solid_food_times[i-1]
+            hours = interval.total_seconds() / 3600
+            solid_food_intervals.append({
+                'From': solid_food_times[i-1].strftime('%I:%M %p'),
+                'To': solid_food_times[i].strftime('%I:%M %p'),
+                'Interval (hours)': f"{hours:.2f}",
+                'Interval (h:m)': f"{int(hours)}h {int((hours % 1) * 60)}m"
+            })
+        
+        solid_food_df = pd.DataFrame(solid_food_intervals)
+        st.dataframe(solid_food_df, hide_index=True, use_container_width=True)
+        
+        avg_interval = sum(float(i['Interval (hours)']) for i in solid_food_intervals) / len(solid_food_intervals)
+        st.caption(f"Total Feedings: {len(solid_food_times)} | Average Interval: {avg_interval:.2f}h")
+    elif len(solid_food_times) == 1:
+        st.info(f"Only one solid food event at {solid_food_times[0].strftime('%I:%M %p')}")
+    else:
+        st.info("No solid food events found")
+    
+    st.divider()
+    
+    # Diaper Change Intervals
+    st.markdown("**🚼 Time Between Diaper Changes**")
+    diaper_times = df_analysis[df_analysis['Action'] == 'Diaper Change']['datetime'].tolist()
+    
+    if len(diaper_times) > 1:
+        diaper_intervals = []
+        for i in range(1, len(diaper_times)):
+            interval = diaper_times[i] - diaper_times[i-1]
+            hours = interval.total_seconds() / 3600
+            diaper_intervals.append({
+                'From': diaper_times[i-1].strftime('%I:%M %p'),
+                'To': diaper_times[i].strftime('%I:%M %p'),
+                'Interval (hours)': f"{hours:.2f}",
+                'Interval (h:m)': f"{int(hours)}h {int((hours % 1) * 60)}m"
+            })
+        
+        diaper_df = pd.DataFrame(diaper_intervals)
+        st.dataframe(diaper_df, hide_index=True, use_container_width=True)
+        
+        avg_interval = sum(float(i['Interval (hours)']) for i in diaper_intervals) / len(diaper_intervals)
+        st.caption(f"Total Changes: {len(diaper_times)} | Average Interval: {avg_interval:.2f}h")
+    elif len(diaper_times) == 1:
+        st.info(f"Only one diaper change event at {diaper_times[0].strftime('%I:%M %p')}")
+    else:
+        st.info("No diaper change events found")
+    
     # 24-hour Timeline Visualization
     st.subheader("⏰ 24-Hour Timeline")
     
