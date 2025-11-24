@@ -95,8 +95,8 @@ if df_all is not None and len(df_all) > 0:
     
     st.write(f"Showing {len(filtered_df)} records")
     
-    # Display data
-    display_df = filtered_df[['Date', 'Time', 'Action', 'Notes']].sort_values(by='datetime', ascending=False).drop(columns=['datetime'], errors='ignore')
+    # Display data - sort first, then select columns
+    display_df = filtered_df.sort_values(by='datetime', ascending=False)[['Date', 'Time', 'Action', 'Notes']]
     st.dataframe(display_df, hide_index=True, use_container_width=True)
     
     st.divider()
