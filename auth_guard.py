@@ -187,15 +187,15 @@ def show_user_info():
 
         with col1:
             if user.get('avatar_url') and user.get('name'):
-            st.markdown(
-                f"""
-                <div style="display: flex; align-items: center;">
-                <img src="{user['avatar_url']}" width="32" style="border-radius: 50%; margin-right: 8px;">
-                <span style="font-weight: 500;">{user['name']}</span>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+                st.markdown(
+                    f"""
+                    <div style="display: flex; align-items: center;">
+                    <img src="{user['avatar_url']}" width="32" style="border-radius: 50%; margin-right: 8px;">
+                    <span style="font-weight: 500;">{user['name']}</span>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
         
         with col3:
             if st.button("🚪", key="logout_button", help="Logout"):
