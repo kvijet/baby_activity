@@ -49,33 +49,45 @@ def get_github_auth_url():
         'client_id': GITHUB_CLIENT_ID,
         'redirect_uri': REDIRECT_URI,
         'scope': 'read:user user:email',
-        'state': 'random_state_string'  # In production, use a secure random string
+        'state': 'random_state_string'
     }
     return f"https://github.com/login/oauth/authorize?{urlencode(params)}"
 
 def exchange_code_for_token(code):
     """Exchange authorization code for access token"""
-    token_url = "https://github.com/login/oauth/access_token"
-    headers = {'Accept': 'application/json'}
-    data = {
-        'client_id': GITHUB_CLIENT_ID,
-        'client_secret': GITHUB_CLIENT_SECRET,
-        'code': code,
-        'redirect_uri': REDIRECT_URI
-    }
-    
-    response = requests.post(token_url, headers=headers, data=data)
-    if response.status_code == 200:
-        return response.json().get('access_token')
-    return None
+    try:
+        token_url = "https://github.com/login/oauth/access_token"
+        headers = {'Accept': 'application/json'}
+        data = {
+            'client_id': GITHUB_CLIENT_ID,
+            'client_secret': GITHUB_CLIENT_SECRET,
+            'code': code,
+            'redirect_uri': REDIRECT_URI
+        }
+        
+        response = requests.post(token_url, headers=headers, data=data, timeout=10)
+        if response.status_code == 200:
+            result = response.json()
+            if 'access_token' in result:
+                return result['access_token']
+            elif 'error' in result:
+                st.error(f"GitHub OAuth Error: {result.get('error_description', result['error'])}")
+        return None
+    except requests.exceptions.RequestException as e:
+        st.error(f"Network error during authentication: {str(e)}")
+        return None
 
 def get_github_user_info(access_token):
     """Fetch user information from GitHub"""
-    headers = {'Authorization': f'token {access_token}'}
-    response = requests.get('https://api.github.com/user', headers=headers)
-    if response.status_code == 200:
-        return response.json()
-    return None
+    try:
+        headers = {'Authorization': f'token {access_token}'}
+        response = requests.get('https://api.github.com/user', headers=headers, timeout=10)
+        if response.status_code == 200:
+            return response.json()
+        return None
+    except requests.exceptions.RequestException as e:
+        st.error(f"Network error fetching user info: {str(e)}")
+        return None
 
 def is_user_allowed(username):
     """Check if the GitHub username is in the whitelist"""
@@ -88,10 +100,15 @@ def check_authentication():
     # Check if we have a code from GitHub callback
     if 'code' in query_params and not st.session_state.authenticated:
         code = query_params['code']
-        access_token = exchange_code_for_token(code)
+        
+        # Show processing message
+        with st.spinner('Authenticating with GitHub...'):
+            access_token = exchange_code_for_token(code)
         
         if access_token:
-            user_info = get_github_user_info(access_token)
+            with st.spinner('Fetching user information...'):
+                user_info = get_github_user_info(access_token)
+            
             if user_info:
                 username = user_info.get('login')
                 
@@ -110,6 +127,25 @@ def check_authentication():
                     st.session_state.denied_user = username
                     st.query_params.clear()
                     st.rerun()
+            else:
+                st.error("Failed to fetch user information from GitHub. Please try again.")
+                if st.button("Retry Login"):
+                    st.query_params.clear()
+                    st.rerun()
+        else:
+            st.error("Failed to authenticate with GitHub. Please try again.")
+            if st.button("Retry Login"):
+                st.query_params.clear()
+                st.rerun()
+    
+    # Handle error parameter from GitHub
+    elif 'error' in query_params:
+        error = query_params['error']
+        error_description = query_params.get('error_description', 'Unknown error')
+        st.error(f"GitHub OAuth Error: {error_description}")
+        if st.button("Back to Login"):
+            st.query_params.clear()
+            st.rerun()
 
 def show_login_page():
     """Display login page"""
@@ -121,27 +157,28 @@ def show_login_page():
         st.markdown("### 🔐 Authentication Required")
         st.info("Please login with your authorized GitHub account to access the baby activity tracker.")
         
+        # Check if OAuth is configured
+        if not GITHUB_CLIENT_ID or not GITHUB_CLIENT_SECRET:
+            st.error("⚠️ GitHub OAuth is not configured. Please contact the administrator.")
+            st.stop()
+        
         auth_url = get_github_auth_url()
-        st.markdown(f"""
-            <a href="{auth_url}" target="_self">
-                <button style="
-                    background-color: #24292e;
-                    color: white;
-                    padding: 12px 24px;
-                    border: none;
-                    border-radius: 6px;
-                    cursor: pointer;
-                    font-size: 16px;
-                    font-weight: bold;
-                    width: 100%;
-                ">
-                    🐙 Login with GitHub
-                </button>
-            </a>
-        """, unsafe_allow_html=True)
+        
+        # Use a link button for better compatibility
+        st.link_button(
+            label="🐙 Login with GitHub",
+            url=auth_url,
+            use_container_width=True
+        )
         
         st.markdown("---")
         st.caption("Only authorized GitHub users can access this application.")
+        
+        # Show configuration info for debugging (only in development)
+        if st.secrets.get("debug_mode", False):
+            with st.expander("🔍 Debug Info"):
+                st.write("Client ID:", GITHUB_CLIENT_ID[:10] + "..." if GITHUB_CLIENT_ID else "Not set")
+                st.write("Redirect URI:", REDIRECT_URI)
 
 def show_access_denied():
     """Display access denied page"""
