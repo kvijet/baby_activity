@@ -12,6 +12,7 @@ from utils import (
     fill_missing_sleep_wake_events
 )
 from timeline_chart import create_24hour_timeline
+from auth_guard import require_authentication
 
 st.set_page_config(
     page_title="Sandbox - Suddu Tracker 👶",
@@ -19,6 +20,9 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed"
 )
+
+# Protect this page with authentication
+require_authentication()
 
 # Load custom CSS
 load_css(Path(__file__).parent.parent)
