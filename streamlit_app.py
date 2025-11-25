@@ -206,21 +206,19 @@ def show_access_denied():
         st.caption("This application is restricted to authorized users only.")
 
 def show_user_info():
-    """Display logged-in user information in sidebar"""
+    """Display logged-in user information in header"""
     if st.session_state.user_info:
-        with st.sidebar:
-            st.markdown("### 👤 Logged in as:")
-            user = st.session_state.user_info
-            
+        user = st.session_state.user_info
+        
+        # Create a compact user info bar at the top
+        col1, col2, col3 = st.columns([6, 1, 1])
+        
+        with col2:
             if user.get('avatar_url'):
-                st.image(user['avatar_url'], width=100)
-            
-            st.write(f"**{user.get('name', user.get('login'))}**")
-            st.caption(f"@{user.get('login')}")
-            
-            st.markdown("---")
-            
-            if st.button("🚪 Logout"):
+                st.image(user['avatar_url'], width=40)
+        
+        with col3:
+            if st.button("🚪", key="logout_button", help="Logout"):
                 st.session_state.authenticated = False
                 st.session_state.user_info = None
                 st.session_state.access_denied = False
@@ -243,7 +241,7 @@ if not st.session_state.authenticated:
     show_login_page()
     st.stop()
 
-# Show user info in sidebar
+# Show user info in header
 show_user_info()
 
 st.title("👶 Suddu Tracker 👶")
